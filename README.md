@@ -4,15 +4,31 @@ Created by Chenran(cn257@cornell.edu)
 
 Refactored by Isaac Chan (isaactinghong@gmail.com)
 
-This is a simple version of **chatgpt in flutter**, using your own API key. With this app, you can chat in app with chatgpt. I never learned flutter before, but with ChatGPT, I created this simple version in 2 days! You can build this too!
-
-I implemented this for fun and improving my code skills, also other flutter beginners can start with my projects to build their ideas. There may be some bugs though, bare with me. But the data structure classes are delicatedly written! I've learned a lot during this simple development, the biggest lesson is:
-
-**Think before you code!**
+This is a simple version of **chatgpt in flutter**, using your own API key. With this app, you can chat in app with chatgpt.
 
 |                            |                            |                            |
 | -------------------------- | -------------------------- | -------------------------- |
 | ![img](images/screen1.png) | ![img](images/screen2.png) | ![img](images/screen3.png) |
+
+## Features
+
+The app includes the following features:
+
+- Chat with ChatGPT using the OpenAI API
+- Display chat history
+- Add new conversations
+- Rename existing conversations
+- Delete conversations
+- text field multiline
+- api key storage
+- conversations auto save and load
+- selectable conversation text
+- auto scroll to bottom during message
+- focus on text field after send
+- loading spinner
+- json serializable
+- auto rename conversation topic
+- scroll to bottom button
 
 ## Getting Started
 
@@ -20,8 +36,8 @@ I implemented this for fun and improving my code skills, also other flutter begi
 
 Before you start, make sure you have the following:
 
-Flutter installed on your machine. You can follow the instructions here.
-An API key for the OpenAI ChatGPT language model. You can apply for an API key here.
+- Flutter installed on your machine
+- An API key for the OpenAI ChatGPT language model. You can apply for an API key here.
 
 ### Installation
 
@@ -33,39 +49,23 @@ You will also need the Xcode to simulate the ios environment.
 flutter run
 '''
 
-## Features
+## TODO
 
-The app includes the following features:
+[o] fix Chinese character errors
+[o] when click send, messages can be pushed
+[ ] for Desktop, enter to send message
+[ ] for Desktop, shift+enter to newline
+[ ] other features than chatting... use your creative mind
+[ ] deploy to app store
 
-- Chat with ChatGPT using the OpenAI API
-- Display chat history
-- Add new conversations
-- Rename existing conversations
-- Delete conversations
+(last updated 2023-03-07)
+
+## License
+
+You can use this project for your own further development! Happy developing and chatting!
 
 ## Acknowledgments
 
 The OpenAI API for providing the language model used in the app.
 The Flutter framework for making it easy to build beautiful and fast mobile apps.
-
-## TODO
-
-_I may not continue do this, if you want to work on this project further, please keep in mind these bugs (updated 3/4/2023)_
-
-[o] fix Chinese character errors
-
-[o] when click send, messages can be pushed
-
-[ ] fix scroll down gestures to hide input keyboard
-
-[ ] change UI settings (now it looks like andriod)
-
-[ ] fix typing box height (now it's fixed size, and the line will stretch vertically)
-
-[ ] other features than chatting... use your creative mind
-
-[ ] deploy to app store
-
-## License
-
-You can use this project for your own further development! Happy developing and chatting!
+Credits to Chenran(cn257@cornell.edu).
