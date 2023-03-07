@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'models.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
+import 'models/message.dart';
+import 'models/sender.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -20,7 +22,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final http.Client _client = http.Client();
-  FocusNode _focusNode = FocusNode();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {

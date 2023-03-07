@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'conversation_provider.dart';
-import 'models.dart';
 import 'change_api_key_dialog.dart';
+import 'models/conversation.dart';
 
 class MenuDrawer extends StatelessWidget {
+  const MenuDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(

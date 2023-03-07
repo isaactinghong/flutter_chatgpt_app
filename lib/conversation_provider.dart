@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
-import 'models.dart';
+import 'models/conversation.dart';
+import 'models/message.dart';
 
 class ConversationProvider extends ChangeNotifier {
   final LocalStorage storage = LocalStorage('chatgpt');
@@ -137,8 +138,3 @@ class ConversationProvider extends ChangeNotifier {
 }
 
 const String model = "gpt-3.5-turbo";
-
-final Sender systemSender = Sender(
-    name: 'System', avatarAssetPath: 'resources/avatars/ChatGPT_logo.png');
-final Sender userSender =
-    Sender(name: 'User', avatarAssetPath: 'resources/avatars/person.png');
