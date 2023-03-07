@@ -5,7 +5,7 @@ import 'conversation_provider.dart';
 import 'models.dart';
 import 'change_api_key_dialog.dart';
 
-class MyDrawer extends StatelessWidget {
+class MenuDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(

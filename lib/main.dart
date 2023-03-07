@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'chatpage.dart';
-import 'drawer.dart';
+import 'menu-drawer.dart';
 import 'conversation_provider.dart';
 import 'popmenu.dart';
 
@@ -32,7 +32,8 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: Text(
-            Provider.of<ConversationProvider>(context, listen: true).currentConversationTitle,
+            Provider.of<ConversationProvider>(context, listen: true)
+                .currentConversationTitle,
             style: const TextStyle(
               fontSize: 20.0, // change font size
               color: Colors.black, // change font color
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
             CustomPopupMenu(),
           ],
         ),
-        drawer: MyDrawer(),
+        drawer: MenuDrawer(),
         body: const Center(
           child: ChatPage(),
         ),
