@@ -128,7 +128,10 @@ class _ChatPageState extends State<ChatPage> {
         final content = completion['message']['content'] as String;
         // delete all the prefix '\n' in content
         final contentWithoutPrefix = content.replaceFirst(RegExp(r'^\n+'), '');
-        return constructAssistantMessage(contentWithoutPrefix);
+
+        final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
+
+        return constructAssistantMessage(decodedContent);
       }
     } else {
       // invalid api key
