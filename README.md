@@ -1,6 +1,7 @@
 # Simple Flutter Version ChatGPT
 
 Created by Chenran(cn257@cornell.edu)
+
 Refactored by Isaac Chan (isaactinghong@gmail.com)
 
 This is a simple version of **chatgpt in flutter**, using your own API key. With this app, you can chat in app with chatgpt. I never learned flutter before, but with ChatGPT, I created this simple version in 2 days! You can build this too!
