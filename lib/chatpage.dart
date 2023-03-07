@@ -23,6 +23,7 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   final http.Client _client = http.Client();
   final FocusNode _focusNode = FocusNode();
+  bool _isBottom = true;
 
   @override
   void dispose() {
@@ -143,15 +144,12 @@ Error: ${response.body}''');
     return null;
   }
 
-  //scroll to last message
-  void _scrollToLastMessage() {
-    final double height = _scrollController.position.maxScrollExtent;
-    // final double lastMessageHeight =
-    //     _scrollController.position.viewportDimension;
+  // scroll to bottom
+  void _scrollToBottom() {
     _scrollController.animateTo(
-      height,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutCubic,
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
     );
   }
 
@@ -179,7 +177,7 @@ Error: ${response.body}''');
 
       // scroll to last message after small delay
       await Future.delayed(const Duration(milliseconds: 100));
-      _scrollToLastMessage();
+      _scrollToBottom();
 
       if (context.mounted) {
         final providerInner =
@@ -193,7 +191,7 @@ Error: ${response.body}''');
             });
             // scroll to last message after small delay
             await Future.delayed(const Duration(milliseconds: 100));
-            _scrollToLastMessage();
+            _scrollToBottom();
 
             // ask for a topic
             final topic =
@@ -229,83 +227,92 @@ Error: ${response.body}''');
           Expanded(
             child: Consumer<ConversationProvider>(
               builder: (context, conversationProvider, child) {
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: conversationProvider.currentConversationLength,
-                  itemBuilder: (BuildContext context, int index) {
-                    Message message = conversationProvider
-                        .currentConversation.messages[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (message.senderId != userSender.id)
-                            CircleAvatar(
-                              backgroundImage:
-                                  AssetImage(systemSender.avatarAssetPath),
-                              radius: 16.0,
-                            )
-                          else
-                            const SizedBox(width: 24.0),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Align(
-                              alignment: message.senderId == userSender.id
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 16.0),
-                                decoration: BoxDecoration(
-                                  color: message.senderId == userSender.id
-                                      ? Color(0xff55bb8e)
-                                      : Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Builder(builder: (context) {
-                                  if (message.isLoading) {
-                                    return const SizedBox(
-                                      height: 16.0,
-                                      width: 16.0,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.0,
+                return NotificationListener(
+                  onNotification: (notification) {
+                    if (notification is ScrollEndNotification) {
+                      setState(() => _isBottom =
+                          _scrollController.position.extentAfter == 0);
+                    }
+                    return true;
+                  },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: conversationProvider.currentConversationLength,
+                    itemBuilder: (BuildContext context, int index) {
+                      Message message = conversationProvider
+                          .currentConversation.messages[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (message.senderId != userSender.id)
+                              CircleAvatar(
+                                backgroundImage:
+                                    AssetImage(systemSender.avatarAssetPath),
+                                radius: 16.0,
+                              )
+                            else
+                              const SizedBox(width: 24.0),
+                            const SizedBox(width: 8.0),
+                            Expanded(
+                              child: Align(
+                                alignment: message.senderId == userSender.id
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: message.senderId == userSender.id
+                                        ? Color(0xff55bb8e)
+                                        : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Builder(builder: (context) {
+                                    if (message.isLoading) {
+                                      return const SizedBox(
+                                        height: 16.0,
+                                        width: 16.0,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.0,
+                                        ),
+                                      );
+                                    }
+                                    return SelectableText(
+                                      message.content,
+                                      style: TextStyle(
+                                        color: message.senderId == userSender.id
+                                            ? Colors.white
+                                            : Colors.black,
                                       ),
                                     );
-                                  }
-                                  return SelectableText(
-                                    message.content,
-                                    style: TextStyle(
-                                      color: message.senderId == userSender.id
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  );
-                                }),
+                                  }),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          if (message.senderId == userSender.id)
-                            CircleAvatar(
-                              backgroundImage:
-                                  AssetImage(userSender.avatarAssetPath),
-                              radius: 16.0,
-                            )
-                          else
-                            const SizedBox(width: 24.0),
-                        ],
-                      ),
-                    );
-                  },
+                            const SizedBox(width: 8.0),
+                            if (message.senderId == userSender.id)
+                              CircleAvatar(
+                                backgroundImage:
+                                    AssetImage(userSender.avatarAssetPath),
+                                radius: 16.0,
+                              )
+                            else
+                              const SizedBox(width: 24.0),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -353,15 +360,14 @@ Error: ${response.body}''');
 
       // add floating action button, position it at the bottom right, above the send message box
       // do not show it if it's already at the bottom
-      floatingActionButton: _scrollController.hasClients &&
-              _scrollController.offset >=
-                  _scrollController.position.maxScrollExtent
+      floatingActionButton: _isBottom
           ? null
           : FloatingActionButton(
-              onPressed: _scrollToLastMessage,
+              onPressed: _scrollToBottom,
               child: const Icon(Icons.arrow_downward),
             ),
     );
+
     // GestureDetector(
     //   onTap: () => FocusScope.of(context).unfocus(),
     //   onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
