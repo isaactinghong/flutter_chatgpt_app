@@ -7,6 +7,7 @@ import 'conversation_provider.dart';
 import 'popmenu.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ChangeNotifierProvider(
       create: (_) => ConversationProvider(),

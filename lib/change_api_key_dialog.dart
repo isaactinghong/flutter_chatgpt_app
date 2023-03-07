@@ -37,7 +37,8 @@ void showChangeAPIKeyDialog(BuildContext context) async {
                 return;
               }
               Provider.of<ConversationProvider>(context, listen: false)
-                  .yourapikey = newAPIKey;
+                  .saveAPIKey(newAPIKey);
+
               Navigator.pop(context);
             },
           ),

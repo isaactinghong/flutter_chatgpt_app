@@ -81,8 +81,8 @@ Error: ${response.body}''',
   //scroll to last message
   void _scrollToLastMessage() {
     final double height = _scrollController.position.maxScrollExtent;
-    final double lastMessageHeight =
-        _scrollController.position.viewportDimension;
+    // final double lastMessageHeight =
+    //     _scrollController.position.viewportDimension;
     _scrollController.animateTo(
       height,
       duration: const Duration(milliseconds: 500),
@@ -103,13 +103,14 @@ Error: ${response.body}''',
         content: 'Loading...',
       );
       int assistantMessageIndex = -1;
-      setState(() {
-        ConversationProvider provider =
-            Provider.of<ConversationProvider>(context, listen: false);
-        // add to current conversation
-        provider.addMessage(userMessage);
-        assistantMessageIndex = provider.addMessage(assistantLoadingMessage);
-      });
+      ConversationProvider provider =
+          Provider.of<ConversationProvider>(context, listen: false);
+      // add to current conversation
+      provider.addMessage(userMessage);
+      assistantMessageIndex =
+          await provider.addMessage(assistantLoadingMessage);
+      // setState to rebuild the listview
+      setState(() {});
 
       // scroll to last message after small delay
       await Future.delayed(const Duration(milliseconds: 100));
