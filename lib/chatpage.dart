@@ -128,124 +128,125 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(
     BuildContext context,
   ) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        // resizeToAvoidBottomInset: true,
-        body: Column(
-          children: [
-            Expanded(
-              child: Consumer<ConversationProvider>(
-                builder: (context, conversationProvider, child) {
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: conversationProvider.currentConversationLength,
-                    itemBuilder: (BuildContext context, int index) {
-                      Message message = conversationProvider
-                          .currentConversation.messages[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (message.senderId != userSender.id)
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(systemSender.avatarAssetPath),
-                                radius: 16.0,
-                              )
-                            else
-                              const SizedBox(width: 24.0),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Align(
-                                alignment: message.senderId == userSender.id
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: message.senderId == userSender.id
-                                        ? Color(0xff55bb8e)
-                                        : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Text(
-                                    message.content,
-                                    style: TextStyle(
-                                      color: message.senderId == userSender.id
-                                          ? Colors.white
-                                          : Colors.black,
+    return Scaffold(
+      // resizeToAvoidBottomInset: true,
+      body: Column(
+        children: [
+          Expanded(
+            child: Consumer<ConversationProvider>(
+              builder: (context, conversationProvider, child) {
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: conversationProvider.currentConversationLength,
+                  itemBuilder: (BuildContext context, int index) {
+                    Message message = conversationProvider
+                        .currentConversation.messages[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (message.senderId != userSender.id)
+                            CircleAvatar(
+                              backgroundImage:
+                                  AssetImage(systemSender.avatarAssetPath),
+                              radius: 16.0,
+                            )
+                          else
+                            const SizedBox(width: 24.0),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Align(
+                              alignment: message.senderId == userSender.id
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 16.0),
+                                decoration: BoxDecoration(
+                                  color: message.senderId == userSender.id
+                                      ? Color(0xff55bb8e)
+                                      : Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
                                     ),
+                                  ],
+                                ),
+                                child: SelectableText(
+                                  message.content,
+                                  style: TextStyle(
+                                    color: message.senderId == userSender.id
+                                        ? Colors.white
+                                        : Colors.black,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8.0),
-                            if (message.senderId == userSender.id)
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(userSender.avatarAssetPath),
-                                radius: 16.0,
-                              )
-                            else
-                              const SizedBox(width: 24.0),
-                          ],
-                        ),
-                      );
-                    },
-                  ).build(context);
-                },
-              ),
-            ),
-
-            // input box
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _focusNode.requestFocus(),
-                      child: TextField(
-                        maxLines: null,
-                        autofocus: true,
-                        focusNode: _focusNode,
-                        textInputAction: TextInputAction.newline,
-                        controller: _textController,
-                        decoration: const InputDecoration.collapsed(
-                            hintText: 'Type your message...'),
-                        onSubmitted: (_) => _onSubmitMessage(),
+                          ),
+                          const SizedBox(width: 8.0),
+                          if (message.senderId == userSender.id)
+                            CircleAvatar(
+                              backgroundImage:
+                                  AssetImage(userSender.avatarAssetPath),
+                              radius: 16.0,
+                            )
+                          else
+                            const SizedBox(width: 24.0),
+                        ],
                       ),
+                    );
+                  },
+                ).build(context);
+              },
+            ),
+          ),
+
+          // input box
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+            margin:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _focusNode.requestFocus(),
+                    child: TextField(
+                      maxLines: null,
+                      autofocus: true,
+                      focusNode: _focusNode,
+                      textInputAction: TextInputAction.newline,
+                      controller: _textController,
+                      decoration: const InputDecoration.collapsed(
+                          hintText: 'Type your message...'),
+                      onSubmitted: (_) => _onSubmitMessage(),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _onSubmitMessage,
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _onSubmitMessage,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+    // GestureDetector(
+    //   onTap: () => FocusScope.of(context).unfocus(),
+    //   onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
+    //   child:
+    // );
   }
 }
