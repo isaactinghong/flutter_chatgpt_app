@@ -68,12 +68,12 @@ class _ChatPageState extends State<ChatPage> {
       'role': 'user',
       'content': '''Give me a conversation title based on our messages.
           Only give the title text.
-          The sentence should be short and clear.
-          The sentence should not exceed 20 words.
-          Do not give any other information, such as the context.
+          The title should be short and clear.
+          The title should not exceed 20 words.
           Do not start with "Conversation Title:" or "Topic:" or "The topic of this conversation is".
-          Do not end with a period.
-          If the title is not clear, just give a sentence "Unclear topic"."''',
+          Do not end with something like "would be a potential conversation title for your messages".
+          Do not end with a period character.
+          If you are not sure, just give the title "Unclear topic".''',
     });
 
     print('messages for askTopic: $messages');
@@ -151,7 +151,7 @@ Error: ${response.body}''');
     _scrollController.animateTo(
       height,
       duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -306,7 +306,7 @@ Error: ${response.body}''');
                       ),
                     );
                   },
-                ).build(context);
+                );
               },
             ),
           ),
@@ -349,6 +349,18 @@ Error: ${response.body}''');
           ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
+
+      // add floating action button, position it at the bottom right, above the send message box
+      // do not show it if it's already at the bottom
+      floatingActionButton: _scrollController.hasClients &&
+              _scrollController.offset >=
+                  _scrollController.position.maxScrollExtent
+          ? null
+          : FloatingActionButton(
+              onPressed: _scrollToLastMessage,
+              child: const Icon(Icons.arrow_downward),
+            ),
     );
     // GestureDetector(
     //   onTap: () => FocusScope.of(context).unfocus(),
