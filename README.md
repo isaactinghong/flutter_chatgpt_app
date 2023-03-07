@@ -52,17 +52,17 @@ The Flutter framework for making it easy to build beautiful and fast mobile apps
 
 _I may not continue do this, if you want to work on this project further, please keep in mind these bugs (updated 3/4/2023)_
 
-[ ] fix scroll down gestures to hide input keyboard
+[o] fix Chinese character errors
 
-[ ] when click send, messages can be pushed
+[o] when click send, messages can be pushed
+
+[ ] fix scroll down gestures to hide input keyboard
 
 [ ] change UI settings (now it looks like andriod)
 
 [ ] fix typing box height (now it's fixed size, and the line will stretch vertically)
 
 [ ] other features than chatting... use your creative mind
-
-[ ] fix Chinese character errors
 
 [ ] deploy to app store
 

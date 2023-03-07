@@ -332,7 +332,7 @@ Error: ${response.body}''');
                       autofocus: true,
                       focusNode: _focusNode,
                       keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.send,
+                      textInputAction: TextInputAction.newline,
                       controller: _textController,
                       decoration: const InputDecoration.collapsed(
                           hintText: 'Type your message...'),
