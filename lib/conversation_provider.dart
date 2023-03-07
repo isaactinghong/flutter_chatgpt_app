@@ -74,8 +74,22 @@ class ConversationProvider extends ChangeNotifier {
   }
 
   // add to current conversation
-  void addMessage(Message message) {
+  int addMessage(Message message) {
     _conversations[_currentConversationIndex].messages.add(message);
+    final messageIndex =
+        _conversations[_currentConversationIndex].messages.length - 1;
+    notifyListeners();
+
+    // return message index
+    return messageIndex;
+  }
+
+  // modify a message in current conversation
+  void modifyMessage(int index, Message message) {
+    assert(index < _conversations[_currentConversationIndex].messages.length);
+    assert(index >= 0);
+
+    _conversations[_currentConversationIndex].messages[index] = message;
     notifyListeners();
   }
 

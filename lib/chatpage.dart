@@ -52,6 +52,8 @@ class _ChatPageState extends State<ChatPage> {
     };
     final response =
         await _client.post(url, headers: headers, body: json.encode(body));
+
+    print('openai response: ${response.body}');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final completions = data['choices'] as List<dynamic>;
@@ -93,12 +95,22 @@ Error: ${response.body}''',
     if (text.isNotEmpty) {
       _textController.clear();
       _focusNode.requestFocus();
+
       final userMessage = Message(senderId: userSender.id, content: text);
+      final assistantLoadingMessage = Message(
+        senderId: systemSender.id,
+        isLoading: true,
+        content: 'Loading...',
+      );
+      int assistantMessageIndex = -1;
       setState(() {
+        ConversationProvider provider =
+            Provider.of<ConversationProvider>(context, listen: false);
         // add to current conversation
-        Provider.of<ConversationProvider>(context, listen: false)
-            .addMessage(userMessage);
+        provider.addMessage(userMessage);
+        assistantMessageIndex = provider.addMessage(assistantLoadingMessage);
       });
+
       // scroll to last message after small delay
       await Future.delayed(const Duration(milliseconds: 100));
       _scrollToLastMessage();
@@ -110,7 +122,7 @@ Error: ${response.body}''',
           if (assistantMessage != null) {
             setState(() {
               Provider.of<ConversationProvider>(context, listen: false)
-                  .addMessage(assistantMessage);
+                  .modifyMessage(assistantMessageIndex, assistantMessage);
             });
             // scroll to last message after small delay
             await Future.delayed(const Duration(milliseconds: 100));
@@ -183,14 +195,25 @@ Error: ${response.body}''',
                                     ),
                                   ],
                                 ),
-                                child: SelectableText(
-                                  message.content,
-                                  style: TextStyle(
-                                    color: message.senderId == userSender.id
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
+                                child: Builder(builder: (context) {
+                                  if (message.isLoading) {
+                                    return const SizedBox(
+                                      height: 16.0,
+                                      width: 16.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                      ),
+                                    );
+                                  }
+                                  return SelectableText(
+                                    message.content,
+                                    style: TextStyle(
+                                      color: message.senderId == userSender.id
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
+                                  );
+                                }),
                               ),
                             ),
                           ),
