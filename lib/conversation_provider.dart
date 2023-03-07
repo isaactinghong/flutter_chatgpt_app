@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 
 import 'models.dart';
 
 class ConversationProvider extends ChangeNotifier {
+  final LocalStorage storage = LocalStorage('chatgpt.json');
+
   List<Conversation> _conversations = [];
   int _currentConversationIndex = 0;
   String apikey = "YOUR_API_KEY";
@@ -40,6 +43,9 @@ class ConversationProvider extends ChangeNotifier {
 
   // initialize provider conversation list
   ConversationProvider() {
+    // load api key
+    apikey = storage.getItem('apiKey') ?? apikey;
+
     _conversations.add(Conversation(messages: [], title: 'new conversation'));
   }
 
@@ -57,6 +63,7 @@ class ConversationProvider extends ChangeNotifier {
 
   // change api key
   set yourapikey(String value) {
+    storage.setItem('apiKey', value);
     apikey = value;
     notifyListeners();
   }

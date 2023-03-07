@@ -25,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _client.close();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -35,7 +36,8 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<Message?> _sendMessage(List<Map<String, String>> messages) async {
     final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-    final apiKey = Provider.of<ConversationProvider>(context, listen: false).yourapikey;
+    final apiKey =
+        Provider.of<ConversationProvider>(context, listen: false).yourapikey;
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
@@ -79,7 +81,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-
   void _sendMessageAndAddToChat() async {
     final text = _textController.text.trim();
     if (text.isNotEmpty) {
@@ -90,153 +91,157 @@ class _ChatPageState extends State<ChatPage> {
         Provider.of<ConversationProvider>(context, listen: false)
             .addMessage(userMessage);
       });
-
-      // TODO:scroll to last message
+      // scroll to last message after small delay
+      await Future.delayed(const Duration(milliseconds: 100));
       _scrollToLastMessage();
 
-      final assistantMessage = await _sendMessage(
-          Provider.of<ConversationProvider>(context, listen: false)
-              .currentConversationMessages);
-      if (assistantMessage != null) {
-        setState(() {
-          Provider.of<ConversationProvider>(context, listen: false)
-              .addMessage(assistantMessage);
-        });
-      }
-
-      // TODO:scroll to last message
-      _scrollToLastMessage();
+      _sendMessage(Provider.of<ConversationProvider>(context, listen: false)
+              .currentConversationMessages)
+          .then((assistantMessage) async {
+        if (assistantMessage != null) {
+          setState(() {
+            Provider.of<ConversationProvider>(context, listen: false)
+                .addMessage(assistantMessage);
+          });
+          // scroll to last message after small delay
+          await Future.delayed(const Duration(milliseconds: 100));
+          _scrollToLastMessage();
+        }
+      });
     }
+  }
+
+  // onSubmitMessage
+  void _onSubmitMessage() {
+    // listen to apikey to see if changed
+    Provider.of<ConversationProvider>(context, listen: false).yourapikey ==
+            "YOUR_API_KEY"
+        ? showRenameDialog(context)
+        : _sendMessageAndAddToChat();
   }
 
   @override
   Widget build(
     BuildContext context,
   ) {
-    return 
-    GestureDetector(
+    return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
       child: Scaffold(
-      // resizeToAvoidBottomInset: true,
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<ConversationProvider>(
-              builder: (context, conversationProvider, child) {
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: conversationProvider.currentConversationLength,
-                  itemBuilder: (BuildContext context, int index) {
-                    Message message = conversationProvider
-                        .currentConversation.messages[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (message.senderId != userSender.id)
-                            CircleAvatar(
-                              backgroundImage:
-                                  AssetImage(systemSender.avatarAssetPath),
-                              radius: 16.0,
-                            )
-                          else
-                            const SizedBox(width: 24.0),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Align(
-                              alignment: message.senderId == userSender.id
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 16.0),
-                                decoration: BoxDecoration(
-                                  color: message.senderId == userSender.id
-                                      ? Color(0xff55bb8e)
-                                      : Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  message.content,
-                                  style: TextStyle(
+        // resizeToAvoidBottomInset: true,
+        body: Column(
+          children: [
+            Expanded(
+              child: Consumer<ConversationProvider>(
+                builder: (context, conversationProvider, child) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: conversationProvider.currentConversationLength,
+                    itemBuilder: (BuildContext context, int index) {
+                      Message message = conversationProvider
+                          .currentConversation.messages[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (message.senderId != userSender.id)
+                              CircleAvatar(
+                                backgroundImage:
+                                    AssetImage(systemSender.avatarAssetPath),
+                                radius: 16.0,
+                              )
+                            else
+                              const SizedBox(width: 24.0),
+                            const SizedBox(width: 8.0),
+                            Expanded(
+                              child: Align(
+                                alignment: message.senderId == userSender.id
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                  decoration: BoxDecoration(
                                     color: message.senderId == userSender.id
-                                        ? Colors.white
-                                        : Colors.black,
+                                        ? Color(0xff55bb8e)
+                                        : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    message.content,
+                                    style: TextStyle(
+                                      color: message.senderId == userSender.id
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          if (message.senderId == userSender.id)
-                            CircleAvatar(
-                              backgroundImage:
-                                  AssetImage(userSender.avatarAssetPath),
-                              radius: 16.0,
-                            )
-                          else
-                            const SizedBox(width: 24.0),
-                        ],
+                            const SizedBox(width: 8.0),
+                            if (message.senderId == userSender.id)
+                              CircleAvatar(
+                                backgroundImage:
+                                    AssetImage(userSender.avatarAssetPath),
+                                radius: 16.0,
+                              )
+                            else
+                              const SizedBox(width: 24.0),
+                          ],
+                        ),
+                      );
+                    },
+                  ).build(context);
+                },
+              ),
+            ),
+
+            // input box
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(32.0),
+              ),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _focusNode.requestFocus(),
+                      child: TextField(
+                        maxLines: null,
+                        autofocus: true,
+                        focusNode: _focusNode,
+                        textInputAction: TextInputAction.newline,
+                        controller: _textController,
+                        decoration: const InputDecoration.collapsed(
+                            hintText: 'Type your message...'),
+                        onSubmitted: (_) => _onSubmitMessage(),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-
-          // input box
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(32.0),
-            ),
-            margin:
-                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-            padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: const InputDecoration.collapsed(
-                        hintText: 'Type your message...'),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: 
-                  // listen to apikey to see if changed
-                  Provider.of<ConversationProvider>(context, listen: true)
-                          .yourapikey == "YOUR_API_KEY"
-                      ? () {
-                        showRenameDialog(context);
-                      }
-                      : () {
-                          _sendMessageAndAddToChat();
-                        },
-
-                  
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _onSubmitMessage,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
-    
-    
   }
 }
