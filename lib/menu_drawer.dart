@@ -91,16 +91,18 @@ class MenuDrawer extends StatelessWidget {
                                   size: 20.0,
                                 ),
                                 const SizedBox(width: 15.0),
-                                Text(
-                                  conversation.title,
-                                  style: TextStyle(
-                                    // fontWeight: FontWeight.bold,
-                                    color: conversationProvider
-                                                .currentConversationIndex ==
-                                            index
-                                        ? Colors.white
-                                        : Colors.grey[700],
-                                    fontFamily: 'din-regular',
+                                Flexible(
+                                  child: Text(
+                                    conversation.title,
+                                    style: TextStyle(
+                                      // fontWeight: FontWeight.bold,
+                                      color: conversationProvider
+                                                  .currentConversationIndex ==
+                                              index
+                                          ? Colors.white
+                                          : Colors.grey[700],
+                                      fontFamily: 'din-regular',
+                                    ),
                                   ),
                                 ),
                               ],

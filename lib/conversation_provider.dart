@@ -87,25 +87,6 @@ class ConversationProvider extends ChangeNotifier {
     });
   }
 
-  // add new conversation
-  void addConversation(String title) {
-    _conversations.add(Conversation(messages: [], title: title));
-    _currentConversationIndex = _conversations.length - 1;
-    notifyListeners();
-  }
-
-  // change conversation
-  void changeConversation(int index) {
-    _currentConversationIndex = index;
-    notifyListeners();
-  }
-
-  // // add new message
-  // void addMessage(Message message) {
-  //   _conversations[_currentConversationIndex].messages.add(message);
-  //   notifyListeners();
-  // }
-
   // initialize provider conversation list
   ConversationProvider() {
     // load API Key
@@ -116,10 +97,12 @@ class ConversationProvider extends ChangeNotifier {
 
     notifyListeners();
 
-    _conversations.add(Conversation(messages: [], title: 'new conversation'));
+    if (conversations.isEmpty) {
+      conversations.add(Conversation(messages: [], title: 'new conversation'));
+    }
   }
 
-  // change conversations
+  // conversations setter
   set conversations(List<Conversation> value) {
     _conversations = value;
     notifyListeners();
@@ -172,13 +155,12 @@ class ConversationProvider extends ChangeNotifier {
     await saveConversations();
   }
 
-  // // add new conversation
-  // void addConversation(Conversation conversation) async {
-  //   _conversations.add(conversation);
-  //   _currentConversationIndex = _conversations.length - 1;
-  //   notifyListeners();
-  //   await saveConversations();
-  // }
+  // change conversation title
+  void changeConversationTitle(String title) async {
+    _conversations[_currentConversationIndex].title = title;
+    notifyListeners();
+    await saveConversations();
+  }
 
   // remove conversation by index
   void removeConversation(int index) async {

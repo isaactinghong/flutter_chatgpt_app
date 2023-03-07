@@ -36,6 +36,72 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
   }
 
+  // constructUserMessage, construct a Message object from user
+  // input is the text from user
+  // output is a Message object
+  Message constructUserMessage(String text) {
+    return Message(senderId: userSender.id, content: text);
+  }
+
+  // constructAssistantMessage, construct a Message object from assistant
+  // input is the text from assistant
+  // output is a Message object
+  Message constructAssistantMessage(String text, {bool isLoading = false}) {
+    return Message(
+        senderId: systemSender.id, content: text, isLoading: isLoading);
+  }
+
+  // _askTopic, ask OpenAI to give a topic for the conversation
+  // inputs are the messages in the conversation
+  // output is a topic for the conversation
+  Future<String?> _askTopic(List<Map<String, String>> messages) async {
+    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final apiKey =
+        Provider.of<ConversationProvider>(context, listen: false).yourapikey;
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey',
+    };
+
+    // add a message to tell OpenAI to give a topic
+    messages.add({
+      'role': 'user',
+      'content': '''Give me a conversation title based on our messages.
+          Only give the title text.
+          The sentence should be short and clear.
+          The sentence should not exceed 20 words.
+          Do not give any other information, such as the context.
+          Do not start with "Conversation Title:" or "Topic:" or "The topic of this conversation is".
+          Do not end with a period.
+          If the title is not clear, just give a sentence "Unclear topic"."''',
+    });
+
+    print('messages for askTopic: $messages');
+
+    // send all current conversation to OpenAI
+    final body = {
+      'model': model,
+      'messages': messages,
+    };
+    final response =
+        await _client.post(url, headers: headers, body: json.encode(body));
+
+    print('openai response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final completions = data['choices'] as List<dynamic>;
+      if (completions.isNotEmpty) {
+        final completion = completions[0];
+        final content = completion['message']['content'] as String;
+        // delete all the prefix '\n' in content
+        return content.replaceFirst(RegExp(r'^\n+'), '');
+      }
+    }
+    return null;
+  }
+
+  // Send message to OpenAI
   Future<Message?> _sendMessage(List<Map<String, String>> messages) async {
     final url = Uri.parse('https://api.openai.com/v1/chat/completions');
     final apiKey =
@@ -62,18 +128,14 @@ class _ChatPageState extends State<ChatPage> {
         final content = completion['message']['content'] as String;
         // delete all the prefix '\n' in content
         final contentWithoutPrefix = content.replaceFirst(RegExp(r'^\n+'), '');
-        return Message(
-            senderId: systemSender.id, content: contentWithoutPrefix);
+        return constructAssistantMessage(contentWithoutPrefix);
       }
     } else {
       // invalid api key
       // create a new dialog
-      return Message(
-        content: '''Invalid.
+      return constructAssistantMessage('''Invalid.
 Status code: ${response.statusCode}.
-Error: ${response.body}''',
-        senderId: systemSender.id,
-      );
+Error: ${response.body}''');
     }
     return null;
   }
@@ -96,12 +158,12 @@ Error: ${response.body}''',
       _textController.clear();
       _focusNode.requestFocus();
 
-      final userMessage = Message(senderId: userSender.id, content: text);
-      final assistantLoadingMessage = Message(
-        senderId: systemSender.id,
+      final userMessage = constructUserMessage(text);
+      final assistantLoadingMessage = constructAssistantMessage(
+        'Loading...',
         isLoading: true,
-        content: 'Loading...',
       );
+
       int assistantMessageIndex = -1;
       ConversationProvider provider =
           Provider.of<ConversationProvider>(context, listen: false);
@@ -117,8 +179,9 @@ Error: ${response.body}''',
       _scrollToLastMessage();
 
       if (context.mounted) {
-        _sendMessage(Provider.of<ConversationProvider>(context, listen: false)
-                .currentConversationMessages)
+        final providerInner =
+            Provider.of<ConversationProvider>(context, listen: false);
+        _sendMessage(providerInner.currentConversationMessages)
             .then((assistantMessage) async {
           if (assistantMessage != null) {
             setState(() {
@@ -128,6 +191,15 @@ Error: ${response.body}''',
             // scroll to last message after small delay
             await Future.delayed(const Duration(milliseconds: 100));
             _scrollToLastMessage();
+
+            // ask for a topic
+            final topic =
+                await _askTopic(providerInner.currentConversationMessages);
+
+            if (topic != null) {
+              // modify the conversation title
+              providerInner.changeConversationTitle(topic);
+            }
           }
         });
       }
