@@ -12,6 +12,7 @@ class ConversationProvider extends ChangeNotifier {
   String apikey = "YOUR_API_KEY";
 
   List<Conversation> get conversations => _conversations;
+
   int get currentConversationIndex => _currentConversationIndex;
   String get currentConversationTitle =>
       _conversations[_currentConversationIndex].title;

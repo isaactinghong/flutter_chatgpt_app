@@ -66,7 +66,12 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       // invalid api key
       // create a new dialog
-      return Message(content: "Invalid", senderId: systemSender.id);
+      return Message(
+        content: '''Invalid.
+Status code: ${response.statusCode}.
+Error: ${response.body}''',
+        senderId: systemSender.id,
+      );
     }
     return null;
   }
@@ -87,6 +92,7 @@ class _ChatPageState extends State<ChatPage> {
     final text = _textController.text.trim();
     if (text.isNotEmpty) {
       _textController.clear();
+      _focusNode.requestFocus();
       final userMessage = Message(senderId: userSender.id, content: text);
       setState(() {
         // add to current conversation
@@ -222,10 +228,12 @@ class _ChatPageState extends State<ChatPage> {
                   child: GestureDetector(
                     onTap: () => _focusNode.requestFocus(),
                     child: TextField(
-                      maxLines: null,
+                      minLines: 1,
+                      maxLines: 6,
                       autofocus: true,
                       focusNode: _focusNode,
-                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.send,
                       controller: _textController,
                       decoration: const InputDecoration.collapsed(
                           hintText: 'Type your message...'),
