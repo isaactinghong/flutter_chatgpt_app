@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'conversation_provider.dart';
 import 'models.dart';
-import 'secrets.dart';
+import 'change_api_key_dialog.dart';
 
 class MyDrawer extends StatelessWidget {
   @override
@@ -116,7 +116,7 @@ class MyDrawer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: GestureDetector(
                 onTap: () {
-                  showRenameDialog(context);
+                  showChangeAPIKeyDialog(context);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -140,5 +140,4 @@ class MyDrawer extends StatelessWidget {
       ),
     );
   }
-  
 }

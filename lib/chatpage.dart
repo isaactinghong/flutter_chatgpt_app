@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'models.dart';
 import 'conversation_provider.dart';
-import 'secrets.dart';
+import 'change_api_key_dialog.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -95,19 +95,21 @@ class _ChatPageState extends State<ChatPage> {
       await Future.delayed(const Duration(milliseconds: 100));
       _scrollToLastMessage();
 
-      _sendMessage(Provider.of<ConversationProvider>(context, listen: false)
-              .currentConversationMessages)
-          .then((assistantMessage) async {
-        if (assistantMessage != null) {
-          setState(() {
-            Provider.of<ConversationProvider>(context, listen: false)
-                .addMessage(assistantMessage);
-          });
-          // scroll to last message after small delay
-          await Future.delayed(const Duration(milliseconds: 100));
-          _scrollToLastMessage();
-        }
-      });
+      if (context.mounted) {
+        _sendMessage(Provider.of<ConversationProvider>(context, listen: false)
+                .currentConversationMessages)
+            .then((assistantMessage) async {
+          if (assistantMessage != null) {
+            setState(() {
+              Provider.of<ConversationProvider>(context, listen: false)
+                  .addMessage(assistantMessage);
+            });
+            // scroll to last message after small delay
+            await Future.delayed(const Duration(milliseconds: 100));
+            _scrollToLastMessage();
+          }
+        });
+      }
     }
   }
 
@@ -116,7 +118,7 @@ class _ChatPageState extends State<ChatPage> {
     // listen to apikey to see if changed
     Provider.of<ConversationProvider>(context, listen: false).yourapikey ==
             "YOUR_API_KEY"
-        ? showRenameDialog(context)
+        ? showChangeAPIKeyDialog(context)
         : _sendMessageAndAddToChat();
   }
 
