@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:localstorage/localstorage.dart';
 import 'package:localstore/localstore.dart';
 
 import 'models/conversation.dart';
@@ -7,7 +6,7 @@ import 'models/message.dart';
 
 class ConversationProvider extends ChangeNotifier {
   final db = Localstore.instance;
-  final String appDataFolder = 'ChatGPT Flutter Data';
+  final String appDataFolder = 'ChatGPTFlutter';
   final String appConfigId = 'appConfig';
   final String conversationsDocId = 'conversations';
 
