@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simple Chat App',
+      title: 'ChatGPT Flutter',
       theme: theme,
       home: Scaffold(
         appBar: AppBar(
