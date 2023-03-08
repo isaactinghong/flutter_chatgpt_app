@@ -1,11 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:localstore/localstore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models/conversation.dart';
 import 'models/message.dart';
 
 class ConversationProvider extends ChangeNotifier {
-  final db = Localstore.instance;
   final String appDataFolder = 'ChatGPTFlutter';
   final String appConfigId = 'appConfig';
   final String conversationsDocId = 'conversations';
@@ -45,53 +46,47 @@ class ConversationProvider extends ChangeNotifier {
     return messages;
   }
 
-  // load API Key from localStore
+  // load API Key from shared_preferences
   Future<void> loadAPIKey() async {
-    try {
-      final data = await db.collection(appDataFolder).doc(appConfigId).get();
-      if (data != null) {
-        apikey = data['apikey'];
-      }
-    } catch (e) {
-      print(e);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey("apikey")) {
+      apikey = prefs.getString("apikey") ?? apikey;
     }
   }
 
-  // save API Key to localStore
+  // save API Key to shared_preferences
   Future<void> saveAPIKey(String newAPIKey) async {
     yourapikey = newAPIKey;
 
-    await db
-        .collection(appDataFolder)
-        .doc(appConfigId)
-        .set({'apikey': newAPIKey});
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("apikey", newAPIKey);
     apikey = newAPIKey;
   }
 
-  // load conversations from localStore
+  // load conversations from shared_preferences
   Future<void> loadConversations() async {
-    try {
-      final data =
-          await db.collection(appDataFolder).doc(conversationsDocId).get();
-      if (data != null) {
-        final List<Conversation> retrievedConversations = data['conversations']
-                ?.map<Conversation>((e) => Conversation.fromJson(e))
-                ?.toList() ??
-            [];
-        conversations = retrievedConversations;
-      }
-    } catch (e) {
-      print(e);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(conversationsDocId)) {
+      final List<Conversation>? retrievedConversations =
+          prefs.getStringList(conversationsDocId)?.map((jsonString) {
+        return Conversation.fromJson(json.decode(jsonString));
+      }).toList();
+
+      conversations = retrievedConversations ?? [];
     }
   }
 
-  // save conversations to localStore
+  // save conversations to shared_preferences
   Future<void> saveConversations() async {
+    final prefs = await SharedPreferences.getInstance();
     final conversationToSave = _conversations.map((e) => e.toJson()).toList();
     print('conversationToSave: $conversationToSave');
-    await db.collection(appDataFolder).doc(conversationsDocId).set({
-      'conversations': conversationToSave,
-    });
+
+    prefs.setStringList(
+        conversationsDocId,
+        conversationToSave.map((conversationJson) {
+          return json.encode(conversationJson);
+        }).toList());
   }
 
   // initialize provider conversation list
