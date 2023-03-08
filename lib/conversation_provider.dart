@@ -48,9 +48,13 @@ class ConversationProvider extends ChangeNotifier {
 
   // load API Key from localStore
   Future<void> loadAPIKey() async {
-    final data = await db.collection(appDataFolder).doc(appConfigId).get();
-    if (data != null) {
-      apikey = data['apikey'];
+    try {
+      final data = await db.collection(appDataFolder).doc(appConfigId).get();
+      if (data != null) {
+        apikey = data['apikey'];
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -67,14 +71,18 @@ class ConversationProvider extends ChangeNotifier {
 
   // load conversations from localStore
   Future<void> loadConversations() async {
-    final data =
-        await db.collection(appDataFolder).doc(conversationsDocId).get();
-    if (data != null) {
-      final List<Conversation> retrievedConversations = data['conversations']
-              ?.map<Conversation>((e) => Conversation.fromJson(e))
-              ?.toList() ??
-          [];
-      conversations = retrievedConversations;
+    try {
+      final data =
+          await db.collection(appDataFolder).doc(conversationsDocId).get();
+      if (data != null) {
+        final List<Conversation> retrievedConversations = data['conversations']
+                ?.map<Conversation>((e) => Conversation.fromJson(e))
+                ?.toList() ??
+            [];
+        conversations = retrievedConversations;
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
