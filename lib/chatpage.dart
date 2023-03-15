@@ -66,7 +66,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // add a message to tell OpenAI to give a topic
     messages.add({
-      'role': 'user',
+      'role': 'system',
       'content': '''Give me a conversation title based on our messages.
           Only give the title text.
           The title should be short and clear.
@@ -95,8 +95,11 @@ class _ChatPageState extends State<ChatPage> {
       if (completions.isNotEmpty) {
         final completion = completions[0];
         final content = completion['message']['content'] as String;
+
+        final decodedContent = utf8.decode(content.codeUnits);
+
         // delete all the prefix '\n' in content
-        return content.replaceFirst(RegExp(r'^\n+'), '');
+        return decodedContent.replaceFirst(RegExp(r'^\n+'), '');
       }
     }
     return null;

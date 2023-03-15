@@ -39,7 +39,7 @@ class ConversationProvider extends ChangeNotifier {
     for (Message message
         in _conversations[_currentConversationIndex].messages) {
       messages.add({
-        'role': message.senderId == 'User' ? 'user' : 'system',
+        'role': message.senderId == 'User' ? 'user' : 'assistant',
         'content': message.content
       });
     }
