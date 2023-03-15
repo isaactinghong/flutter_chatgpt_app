@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
 import 'models/conversation.dart';
@@ -115,6 +116,20 @@ class MenuDrawer extends StatelessWidget {
                 },
               ),
             ),
+            // add version number above the api setting button
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                // get version number from AppProvider
+                'Version ${Provider.of<AppProvider>(context).versionNumber()}',
+                style: TextStyle(
+                  fontFamily: 'din-regular',
+                  color: Colors.grey[700],
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+
             // add a setting button at the end of the drawer
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16.0),

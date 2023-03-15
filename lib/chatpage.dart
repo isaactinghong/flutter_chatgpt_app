@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
-import 'models.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
+import 'main.dart';
 import 'models/message.dart';
 import 'models/sender.dart';
 
@@ -77,7 +77,7 @@ class _ChatPageState extends State<ChatPage> {
           If you are not sure, just give the title "Unclear topic".''',
     });
 
-    print('messages for askTopic: $messages');
+    log.d('messages for askTopic: $messages');
 
     // send all current conversation to OpenAI
     final body = {
@@ -87,7 +87,7 @@ class _ChatPageState extends State<ChatPage> {
     final response =
         await _client.post(url, headers: headers, body: json.encode(body));
 
-    print('openai response: ${response.body}');
+    log.d('openai response: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -123,7 +123,7 @@ class _ChatPageState extends State<ChatPage> {
     final response =
         await _client.post(url, headers: headers, body: json.encode(body));
 
-    print('openai response: ${response.body}');
+    log.d('openai response: ${response.body}');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final completions = data['choices'] as List<dynamic>;
@@ -269,7 +269,7 @@ Error: ${response.body}''');
                                       vertical: 8.0, horizontal: 16.0),
                                   decoration: BoxDecoration(
                                     color: message.senderId == userSender.id
-                                        ? Color(0xff55bb8e)
+                                        ? const Color(0xff55bb8e)
                                         : Colors.grey[200],
                                     borderRadius: BorderRadius.circular(16.0),
                                     boxShadow: [

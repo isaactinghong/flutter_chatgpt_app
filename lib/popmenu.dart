@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'conversation_provider.dart';
-import 'models.dart';
 
 class CustomPopupMenu extends StatelessWidget {
+  const CustomPopupMenu({super.key});
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
@@ -66,11 +67,11 @@ class CustomPopupMenu extends StatelessWidget {
                   ),
                   TextButton(
                     child: const Text(
-                      'Rename'
-                      , style: TextStyle(
+                      'Rename',
+                      style: TextStyle(
                         color: Color(0xff55bb8e),
                       ),
-                      ),
+                    ),
                     onPressed: () {
                       // Call renameConversation method here with the new name
                       Provider.of<ConversationProvider>(context, listen: false)

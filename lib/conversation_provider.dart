@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main.dart';
 import 'models/conversation.dart';
 import 'models/message.dart';
 
@@ -80,7 +81,7 @@ class ConversationProvider extends ChangeNotifier {
   Future<void> saveConversations() async {
     final prefs = await SharedPreferences.getInstance();
     final conversationToSave = _conversations.map((e) => e.toJson()).toList();
-    print('conversationToSave: $conversationToSave');
+    log.d('conversationToSave: $conversationToSave');
 
     prefs.setStringList(
         conversationsDocId,
@@ -190,7 +191,7 @@ class ConversationProvider extends ChangeNotifier {
   void renameConversation(String title) async {
     if (title == "") {
       // no title, use default title
-      title = 'new conversation ${_currentConversationIndex}';
+      title = 'new conversation $_currentConversationIndex';
     }
     _conversations[_currentConversationIndex].title = title;
     notifyListeners();
