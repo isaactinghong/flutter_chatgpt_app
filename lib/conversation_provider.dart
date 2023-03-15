@@ -101,6 +101,7 @@ class ConversationProvider extends ChangeNotifier {
 
     if (conversations.isEmpty) {
       conversations.add(Conversation(messages: [], title: 'new conversation'));
+      _currentConversationIndex = 0;
     }
   }
 
@@ -151,8 +152,10 @@ class ConversationProvider extends ChangeNotifier {
     if (title == '') {
       title = 'new conversation ${_conversations.length}';
     }
-    _conversations.add(Conversation(messages: [], title: title));
-    _currentConversationIndex = _conversations.length - 1;
+
+    // add conversation to the start of the list
+    _conversations.insert(0, Conversation(messages: [], title: title));
+    _currentConversationIndex = 0;
     notifyListeners();
     await saveConversations();
   }
