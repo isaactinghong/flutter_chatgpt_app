@@ -218,5 +218,3 @@ class ConversationProvider extends ChangeNotifier {
     super.notifyListeners();
   }
 }
-
-const String model = "gpt-3.5-turbo";

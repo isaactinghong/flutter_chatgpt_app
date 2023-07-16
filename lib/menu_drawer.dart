@@ -116,6 +116,50 @@ class MenuDrawer extends StatelessWidget {
                 },
               ),
             ),
+
+            const SizedBox(height: 20.0),
+
+            // add gpt model input field
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'GPT Model: ',
+                      style: TextStyle(
+                        fontFamily: 'din-regular',
+                        color: Colors.grey[700],
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: TextEditingController(
+                        text: Provider.of<AppProvider>(context, listen: true)
+                            .gptModel,
+                      ),
+                      onSubmitted: (value) {
+                        Provider.of<AppProvider>(context, listen: false)
+                            .setGptModel(value);
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'gpt-4',
+                        hintStyle: TextStyle(
+                          fontFamily: 'din-regular',
+                          color: Colors.grey[700],
+                          fontSize: 18.0,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // add version number above the api setting button
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16.0),

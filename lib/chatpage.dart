@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
+import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
 import 'main.dart';
@@ -81,7 +82,8 @@ class _ChatPageState extends State<ChatPage> {
 
     // send all current conversation to OpenAI
     final body = {
-      'model': model,
+      // use AppProvider.gptModel as model name
+      'model': Provider.of<AppProvider>(context, listen: false).gptModel,
       'messages': messages,
     };
     final response =
@@ -117,7 +119,8 @@ class _ChatPageState extends State<ChatPage> {
 
     // send all current conversation to OpenAI
     final body = {
-      'model': model,
+      // use AppProvider.gptModel as model name
+      'model': Provider.of<AppProvider>(context, listen: false).gptModel,
       'messages': messages,
     };
     final response =
