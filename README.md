@@ -31,6 +31,8 @@ The app includes the following features:
 - scroll to bottom button
 - gpt model changable (New!)
 
+## Auto Distribution
+
 ## Getting Started
 
 ### Prerequisites
