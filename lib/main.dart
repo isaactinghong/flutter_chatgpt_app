@@ -45,6 +45,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // call loadChangelogContent of AppProvider
+    Provider.of<AppProvider>(context, listen: false)
+        .loadChangelogContent(context);
+
     return MaterialApp(
       // title with version number from AppProvider
       title:

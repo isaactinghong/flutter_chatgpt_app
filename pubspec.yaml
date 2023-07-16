@@ -43,6 +43,7 @@ dependencies:
   shared_preferences:
   package_info_plus:
   logger:
+  flutter_markdown:
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,7 @@ flutter:
     - resources/avatars/ChatGPT.svg
     - resources/avatars/ChatGPT_logo.png
     - resources/avatars/person.png
+    - CHANGELOG.md
 
   fonts:
   - family: din-regular

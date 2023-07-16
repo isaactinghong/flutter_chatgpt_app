@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
 import 'app_provider.dart';
@@ -139,6 +140,7 @@ class MenuDrawer extends StatelessWidget {
                     ),
                     Expanded(
                       child: TextField(
+                        autofocus: true,
                         controller: TextEditingController(
                           text: Provider.of<AppProvider>(context, listen: true)
                               .gptModel,
@@ -165,14 +167,38 @@ class MenuDrawer extends StatelessWidget {
               // add version number above the api setting button
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  // get version number from AppProvider
-                  'Version ${Provider.of<AppProvider>(context).versionNumber()}',
-                  style: TextStyle(
-                    fontFamily: 'din-regular',
-                    color: Colors.grey[700],
-                    fontSize: 18.0,
+                child: GestureDetector(
+                  child: Text(
+                    // get version number from AppProvider
+                    'Version ${Provider.of<AppProvider>(context).versionNumber()}',
+                    style: TextStyle(
+                      fontFamily: 'din-regular',
+                      color: Colors.grey[700],
+                      fontSize: 18.0,
+                    ),
                   ),
+                  // onTap, prompt a modal to display the CHANGELOG.md content
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'ChatGPT Flutter',
+                      applicationVersion:
+                          'Version ${Provider.of<AppProvider>(context, listen: false).versionNumber()}',
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          // width is required to display the markdown content
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          child: Markdown(
+                            // display the CHANGELOG.md content from project root directory
+                            data:
+                                Provider.of<AppProvider>(context, listen: false)
+                                    .changelogContent,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
 

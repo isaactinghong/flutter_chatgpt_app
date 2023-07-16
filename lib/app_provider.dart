@@ -10,6 +10,8 @@ class AppProvider extends ChangeNotifier {
   /// gptModel, a string that stores the GPT model name
   String gptModel = "gpt-3.5-turbo";
 
+  late String changelogContent = "";
+
   /// setGptModel, a setter that sets the GPT model name
   // set it to shared preferences
   setGptModel(String newGPTModel) async {
@@ -42,5 +44,13 @@ class AppProvider extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void loadChangelogContent(context) {
+    // load the CHANGELOG.md content from project root directory
+    DefaultAssetBundle.of(context).loadString("CHANGELOG.md").then((value) => {
+          changelogContent = value,
+          notifyListeners(),
+        });
   }
 }
