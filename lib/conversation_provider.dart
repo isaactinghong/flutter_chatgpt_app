@@ -81,7 +81,7 @@ class ConversationProvider extends ChangeNotifier {
   Future<void> saveConversations() async {
     final prefs = await SharedPreferences.getInstance();
     final conversationToSave = _conversations.map((e) => e.toJson()).toList();
-    log.d('conversationToSave: $conversationToSave');
+    // log.d('conversationToSave: $conversationToSave');
 
     prefs.setStringList(
         conversationsDocId,

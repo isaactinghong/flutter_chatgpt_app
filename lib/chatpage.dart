@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -23,8 +25,28 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final http.Client _client = http.Client();
-  final FocusNode _focusNode = FocusNode();
   bool _isBottom = true;
+
+  // final FocusNode _focusNode = FocusNode();
+  late final _focusNode = FocusNode(
+    onKey: (FocusNode node, RawKeyEvent evt) {
+      if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
+        if (evt is RawKeyDownEvent) {
+          _onSubmitMessage();
+        }
+        return KeyEventResult.handled;
+        // else, if shift is pressed and enter is pressed
+        // add newline to text
+      } else if (evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
+        if (evt is RawKeyDownEvent) {
+          _textController.text += '\n';
+        }
+        return KeyEventResult.handled;
+      } else {
+        return KeyEventResult.ignored;
+      }
+    },
+  );
 
   @override
   void dispose() {
@@ -75,7 +97,7 @@ class _ChatPageState extends State<ChatPage> {
           Do not start with "Conversation Title:" or "Topic:" or "The topic of this conversation is".
           Do not end with something like "would be a potential conversation title for your messages".
           Do not end with a period character.
-          If you are not sure, just give the title "Unclear topic".''',
+          If you are not sure, just give the title: Unclear topic.''',
     });
 
     log.d('messages for askTopic: $messages');
@@ -86,23 +108,31 @@ class _ChatPageState extends State<ChatPage> {
       'model': Provider.of<AppProvider>(context, listen: false).gptModel,
       'messages': messages,
     };
-    final response =
-        await _client.post(url, headers: headers, body: json.encode(body));
 
-    log.d('openai response: ${response.body}');
+    try {
+      final response =
+          await _client.post(url, headers: headers, body: json.encode(body));
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final completions = data['choices'] as List<dynamic>;
-      if (completions.isNotEmpty) {
-        final completion = completions[0];
-        final content = completion['message']['content'] as String;
+      log.d('openai response: ${response.body}');
 
-        final decodedContent = utf8.decode(content.codeUnits);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final completions = data['choices'] as List<dynamic>;
+        if (completions.isNotEmpty) {
+          final completion = completions[0];
+          final content = completion['message']['content'] as String;
 
-        // delete all the prefix '\n' in content
-        return decodedContent.replaceFirst(RegExp(r'^\n+'), '');
+          final decodedContent = utf8.decode(content.codeUnits);
+
+          // delete all the prefix '\n' in content
+          return decodedContent.replaceFirst(RegExp(r'^\n+'), '');
+        }
       }
+    } catch (e) {
+      log.e('_askTopic error: $e', e);
+
+      // return the error message
+      return 'Error: $e';
     }
     return null;
   }
@@ -160,56 +190,69 @@ Error: ${response.body}''');
   }
 
   void _sendMessageAndAddToChat() async {
-    final text = _textController.text.trim();
-    if (text.isNotEmpty) {
-      _textController.clear();
-      _focusNode.requestFocus();
+    try {
+      final text = _textController.text.trim();
+      if (text.isNotEmpty) {
+        _textController.clear();
+        _focusNode.requestFocus();
 
-      final userMessage = constructUserMessage(text);
-      final assistantLoadingMessage = constructAssistantMessage(
-        'Loading...',
-        isLoading: true,
+        final userMessage = constructUserMessage(text);
+        final assistantLoadingMessage = constructAssistantMessage(
+          'Loading...',
+          isLoading: true,
+        );
+
+        int assistantMessageIndex = -1;
+        ConversationProvider provider =
+            Provider.of<ConversationProvider>(context, listen: false);
+        // add to current conversation
+        provider.addMessage(userMessage);
+        assistantMessageIndex =
+            await provider.addMessage(assistantLoadingMessage);
+        // setState to rebuild the listview
+        setState(() {});
+
+        // scroll to last message after small delay
+        await Future.delayed(const Duration(milliseconds: 100));
+        _scrollToBottom();
+
+        if (context.mounted) {
+          final providerInner =
+              Provider.of<ConversationProvider>(context, listen: false);
+          _sendMessage(providerInner.currentConversationMessages)
+              .then((assistantMessage) async {
+            if (assistantMessage != null) {
+              setState(() {
+                Provider.of<ConversationProvider>(context, listen: false)
+                    .modifyMessage(assistantMessageIndex, assistantMessage);
+              });
+              // scroll to last message after small delay
+              await Future.delayed(const Duration(milliseconds: 100));
+              _scrollToBottom();
+
+              // ask for a topic
+              final topic =
+                  await _askTopic(providerInner.currentConversationMessages);
+
+              if (topic != null) {
+                // modify the conversation title
+                providerInner.changeConversationTitle(topic);
+              }
+            }
+          });
+        }
+      }
+    } catch (e) {
+      log.e('_sendMessageAndAddToChat error: $e', e);
+
+      // add the error message to the conversation
+      final errorMessage = constructAssistantMessage(
+        'Error: $e',
       );
 
-      int assistantMessageIndex = -1;
-      ConversationProvider provider =
-          Provider.of<ConversationProvider>(context, listen: false);
       // add to current conversation
-      provider.addMessage(userMessage);
-      assistantMessageIndex =
-          await provider.addMessage(assistantLoadingMessage);
-      // setState to rebuild the listview
-      setState(() {});
-
-      // scroll to last message after small delay
-      await Future.delayed(const Duration(milliseconds: 100));
-      _scrollToBottom();
-
-      if (context.mounted) {
-        final providerInner =
-            Provider.of<ConversationProvider>(context, listen: false);
-        _sendMessage(providerInner.currentConversationMessages)
-            .then((assistantMessage) async {
-          if (assistantMessage != null) {
-            setState(() {
-              Provider.of<ConversationProvider>(context, listen: false)
-                  .modifyMessage(assistantMessageIndex, assistantMessage);
-            });
-            // scroll to last message after small delay
-            await Future.delayed(const Duration(milliseconds: 100));
-            _scrollToBottom();
-
-            // ask for a topic
-            final topic =
-                await _askTopic(providerInner.currentConversationMessages);
-
-            if (topic != null) {
-              // modify the conversation title
-              providerInner.changeConversationTitle(topic);
-            }
-          }
-        });
-      }
+      Provider.of<ConversationProvider>(context, listen: false)
+          .addMessage(errorMessage);
     }
   }
 
@@ -227,7 +270,6 @@ Error: ${response.body}''');
     BuildContext context,
   ) {
     return Scaffold(
-      // resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           Expanded(
@@ -345,11 +387,14 @@ Error: ${response.body}''');
                       autofocus: true,
                       focusNode: _focusNode,
                       keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
+                      // textInputAction: TextInputAction.newline,
+                      textInputAction: Platform.isWindows
+                          ? TextInputAction.done
+                          : TextInputAction.newline,
                       controller: _textController,
                       decoration: const InputDecoration.collapsed(
                           hintText: 'Type your message...'),
-                      onSubmitted: (_) => _onSubmitMessage(),
+                      // onSubmitted: (_) => _onSubmitMessage(),
                     ),
                   ),
                 ),

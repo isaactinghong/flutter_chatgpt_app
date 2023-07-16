@@ -54,8 +54,8 @@ flutter run
 
 [o] fix Chinese character errors
 [o] when click send, messages can be pushed
-[ ] for Desktop, enter to send message
-[ ] for Desktop, shift+enter to newline
+[o] for Desktop, enter to send message
+[o] for Desktop, shift+enter to newline
 [ ] other features than chatting... use your creative mind
 [ ] deploy to app store
 
