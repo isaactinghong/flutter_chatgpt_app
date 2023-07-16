@@ -29,6 +29,7 @@ The app includes the following features:
 - json serializable
 - auto rename conversation topic
 - scroll to bottom button
+- gpt model changable (New!)
 
 ## Getting Started
 
