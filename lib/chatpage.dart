@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -138,46 +140,106 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   // Send message to OpenAI
-  Future<Message?> _sendMessage(List<Map<String, String>> messages) async {
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+  Stream<Message> _sendMessage(List<Map<String, String>> messages) {
+    final openAiUri = Uri.parse('https://api.openai.com/v1/chat/completions');
     final apiKey =
         Provider.of<ConversationProvider>(context, listen: false).yourapikey;
+
+    // TODO: add header to SSE channel to send api key
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
     };
 
     // send all current conversation to OpenAI
-    final body = {
-      // use AppProvider.gptModel as model name
-      'model': Provider.of<AppProvider>(context, listen: false).gptModel,
-      'messages': messages,
-    };
-    final response =
-        await _client.post(url, headers: headers, body: json.encode(body));
+    // final body = {
+    //   // use AppProvider.gptModel as model name
+    //   'model': Provider.of<AppProvider>(context, listen: false).gptModel,
+    //   'messages': messages,
+    //   'stream': true,
+    // };
+    // final response =
+    //     await _client.post(openAiUri, headers: headers, body: json.encode(body));
 
-    log.d('openai response: ${response.body}');
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final completions = data['choices'] as List<dynamic>;
+    // prepare messages into List<OpenAIChatCompletionChoiceMessageModel> openAIMessages
+    List<OpenAIChatCompletionChoiceMessageModel> openAIMessages = [];
+    for (var message in messages) {
+      // convert message['role'] into OpenAIChatMessageRole.user or OpenAIChatMessageRole.assistant
+      openAIMessages.add(OpenAIChatCompletionChoiceMessageModel(
+        content: message['content']!,
+        role: message['role'] == 'user'
+            ? OpenAIChatMessageRole.user
+            : OpenAIChatMessageRole.assistant,
+      ));
+    }
+
+    Stream<OpenAIStreamChatCompletionModel> completionStream =
+        OpenAI.instance.chat.createStream(
+      model: Provider.of<AppProvider>(context, listen: false).gptModel,
+      messages: openAIMessages,
+      maxTokens: 100,
+      temperature: 0.5,
+      topP: 1,
+    );
+
+    // construct a BehaviorSubject to store the temporary message string
+    // the message is to be updated by the response from OpenAI
+    String tempMessage = "";
+
+    // listen to the response from OpenAI
+    //
+    return completionStream.map((event) {
+      log.d('openai response: $event');
+
+      OpenAIStreamChatCompletionModel openAIStreamChatCompletionModel = event;
+
+      // get the completion from the response
+      final completions = openAIStreamChatCompletionModel.choices;
+
       if (completions.isNotEmpty) {
         final completion = completions[0];
-        final content = completion['message']['content'] as String;
-        // delete all the prefix '\n' in content
-        final contentWithoutPrefix = content.replaceFirst(RegExp(r'^\n+'), '');
 
-        final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
+        final content = completion.delta.content;
 
-        return constructAssistantMessage(decodedContent);
+        if (content != null) {
+          // delete all the prefix '\n' in content
+          final contentWithoutPrefix =
+              content.replaceFirst(RegExp(r'^\n+'), '');
+
+          final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
+
+          // constructAssistantMessage(decodedContent);
+          // update the tempMessageStream by appending the decodedContent
+          tempMessage = tempMessage + decodedContent;
+        }
       }
-    } else {
-      // invalid api key
-      // create a new dialog
-      return constructAssistantMessage('''Invalid.
-Status code: ${response.statusCode}.
-Error: ${response.body}''');
-    }
-    return null;
+      return constructAssistantMessage(
+        tempMessage,
+        isLoading: false,
+      );
+    });
+
+    // log.d('openai response: ${response.body}');
+//     if (response.statusCode == 200) {
+//       final data = json.decode(response.body);
+//       final completions = data['choices'] as List<dynamic>;
+//       if (completions.isNotEmpty) {
+//         final completion = completions[0];
+//         final content = completion['message']['content'] as String;
+//         // delete all the prefix '\n' in content
+//         final contentWithoutPrefix = content.replaceFirst(RegExp(r'^\n+'), '');
+
+//         final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
+
+//         return constructAssistantMessage(decodedContent);
+//       }
+//     } else {
+//       // invalid api key
+//       // create a new dialog
+//       return constructAssistantMessage('''Invalid.
+// Status code: ${response.statusCode}.
+// Error: ${response.body}''');
+//     }
   }
 
   // scroll to bottom
@@ -219,26 +281,37 @@ Error: ${response.body}''');
         if (context.mounted) {
           final providerInner =
               Provider.of<ConversationProvider>(context, listen: false);
-          _sendMessage(providerInner.currentConversationMessages)
-              .then((assistantMessage) async {
-            if (assistantMessage != null) {
-              setState(() {
-                Provider.of<ConversationProvider>(context, listen: false)
-                    .modifyMessage(assistantMessageIndex, assistantMessage);
-              });
-              // scroll to last message after small delay
-              await Future.delayed(const Duration(milliseconds: 100));
-              _scrollToBottom();
 
-              // ask for a topic
-              final topic =
-                  await _askTopic(providerInner.currentConversationMessages);
+          _sendMessage(providerInner.currentConversationMessages).listen(
+              (assistantMessage) async {
+            // log onListen
+            log.d('_sendMessage onListen');
 
+            // log the assistantMessage
+            log.d('assistantMessageIndex: $assistantMessageIndex');
+            log.d('assistantMessage.content: ${assistantMessage.content}');
+            log.d('assistantMessage.isLoading: ${assistantMessage.isLoading}');
+            log.d('assistantMessage.senderId: ${assistantMessage.senderId}');
+            log.d('assistantMessage.timestamp: ${assistantMessage.timestamp}');
+
+            setState(() {
+              Provider.of<ConversationProvider>(context, listen: false)
+                  .modifyMessage(assistantMessageIndex, assistantMessage);
+            });
+            // scroll to last message after small delay
+            await Future.delayed(const Duration(milliseconds: 100));
+            _scrollToBottom();
+          }, onDone: () {
+            // log onDone
+            log.d('_sendMessage onDone');
+
+            // ask for a topic
+            _askTopic(providerInner.currentConversationMessages).then((topic) {
               if (topic != null) {
                 // modify the conversation title
                 providerInner.changeConversationTitle(topic);
               }
-            }
+            });
           });
         }
       }
@@ -269,6 +342,13 @@ Error: ${response.body}''');
   Widget build(
     BuildContext context,
   ) {
+    // listen to apikey to see if changed
+    final openAiApiKey =
+        Provider.of<ConversationProvider>(context, listen: true).yourapikey;
+
+    // set the api key to OpenAi
+    OpenAI.apiKey = openAiApiKey;
+
     return Scaffold(
       body: Column(
         children: [

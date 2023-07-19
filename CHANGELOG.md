@@ -1,3 +1,7 @@
+## [1.0.6]
+
+* Added stream result support for chat
+
 ## [1.0.3]
 
 * Improved desktop textfield

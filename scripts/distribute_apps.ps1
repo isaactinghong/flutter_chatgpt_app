@@ -38,4 +38,4 @@ Copy-Item -Path "build\windows\runner\Release\*" -Destination "C:\ChatGPT Flutte
 flutter build apk --release
 
 # move the apk to the distribution folder
-Move-Item -Path "build\app\outputs\flutter-apk\app-release.apk" -Destination $targetDistributionFolder\v$version\app-release.apk"
+Move-Item -Path "build\app\outputs\flutter-apk\app-release.apk" -Destination $targetDistributionFolder\v$version\app-release.apk

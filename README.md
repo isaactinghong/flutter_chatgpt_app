@@ -30,6 +30,7 @@ The app includes the following features:
 - auto rename conversation topic
 - scroll to bottom button
 - gpt model changable (New!)
+- support stream result (New!)
 
 ## Auto Distribution
 
@@ -58,6 +59,7 @@ flutter run
 [o] when click send, messages can be pushed
 [o] for Desktop, enter to send message
 [o] for Desktop, shift+enter to newline
+[o] use stream to handle returned data
 [ ] other features than chatting... use your creative mind
 [ ] deploy to app store
 
