@@ -1,3 +1,7 @@
+## [1.0.8]
+
+* Commented out maxTokens setting. so default is 4096
+
 ## [1.0.7]
 
 * Fixed shift+enter to newline at the cursor position instead of the end of the text
