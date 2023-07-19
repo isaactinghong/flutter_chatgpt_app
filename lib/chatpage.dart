@@ -191,7 +191,7 @@ class _ChatPageState extends State<ChatPage> {
         OpenAI.instance.chat.createStream(
       model: Provider.of<AppProvider>(context, listen: false).gptModel,
       messages: openAIMessages,
-      maxTokens: 100,
+      // maxTokens: 100,
       temperature: 0.5,
       topP: 1,
     );
