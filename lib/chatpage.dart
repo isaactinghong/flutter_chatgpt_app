@@ -41,7 +41,21 @@ class _ChatPageState extends State<ChatPage> {
         // add newline to text
       } else if (evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
         if (evt is RawKeyDownEvent) {
-          _textController.text += '\n';
+          // add newline to cursor position of the text
+          final text = _textController.text;
+          final selection = _textController.selection;
+          final newText = text.replaceRange(
+            selection.start,
+            selection.end,
+            '\n',
+          );
+          final newSelection = TextSelection.collapsed(
+            offset: selection.start + 1,
+          );
+          _textController.value = TextEditingValue(
+            text: newText,
+            selection: newSelection,
+          );
         }
         return KeyEventResult.handled;
       } else {

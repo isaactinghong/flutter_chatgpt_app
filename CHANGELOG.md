@@ -1,3 +1,7 @@
+## [1.0.7]
+
+* Fixed shift+enter to newline at the cursor position instead of the end of the text
+
 ## [1.0.6]
 
 * Added stream result support for chat
