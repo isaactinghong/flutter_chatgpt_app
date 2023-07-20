@@ -1,3 +1,7 @@
+## [1.0.9]
+
+* Fixed Chinese issue. no need to utf8.decode
+
 ## [1.0.8]
 
 * Commented out maxTokens setting. so default is 4096

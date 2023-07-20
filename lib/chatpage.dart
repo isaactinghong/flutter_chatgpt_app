@@ -113,6 +113,7 @@ class _ChatPageState extends State<ChatPage> {
           Do not start with "Conversation Title:" or "Topic:" or "The topic of this conversation is".
           Do not end with something like "would be a potential conversation title for your messages".
           Do not end with a period character.
+          Do not use quotation mark to quote the entire title.
           If you are not sure, just give the title: Unclear topic.''',
     });
 
@@ -159,22 +160,6 @@ class _ChatPageState extends State<ChatPage> {
     final apiKey =
         Provider.of<ConversationProvider>(context, listen: false).yourapikey;
 
-    // TODO: add header to SSE channel to send api key
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
-    };
-
-    // send all current conversation to OpenAI
-    // final body = {
-    //   // use AppProvider.gptModel as model name
-    //   'model': Provider.of<AppProvider>(context, listen: false).gptModel,
-    //   'messages': messages,
-    //   'stream': true,
-    // };
-    // final response =
-    //     await _client.post(openAiUri, headers: headers, body: json.encode(body));
-
     // prepare messages into List<OpenAIChatCompletionChoiceMessageModel> openAIMessages
     List<OpenAIChatCompletionChoiceMessageModel> openAIMessages = [];
     for (var message in messages) {
@@ -215,16 +200,20 @@ class _ChatPageState extends State<ChatPage> {
 
         final content = completion.delta.content;
 
+        // log the content
+        log.d('streamed content: $content');
+
         if (content != null) {
           // delete all the prefix '\n' in content
-          final contentWithoutPrefix =
-              content.replaceFirst(RegExp(r'^\n+'), '');
+          // final contentWithoutPrefix =
+          //     content.replaceFirst(RegExp(r'^\n+'), '');
 
-          final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
+          // final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
 
           // constructAssistantMessage(decodedContent);
           // update the tempMessageStream by appending the decodedContent
-          tempMessage = tempMessage + decodedContent;
+          // tempMessage = tempMessage + decodedContent;
+          tempMessage = tempMessage + content;
         }
       }
       return constructAssistantMessage(
@@ -302,11 +291,11 @@ class _ChatPageState extends State<ChatPage> {
             log.d('_sendMessage onListen');
 
             // log the assistantMessage
-            log.d('assistantMessageIndex: $assistantMessageIndex');
             log.d('assistantMessage.content: ${assistantMessage.content}');
-            log.d('assistantMessage.isLoading: ${assistantMessage.isLoading}');
-            log.d('assistantMessage.senderId: ${assistantMessage.senderId}');
-            log.d('assistantMessage.timestamp: ${assistantMessage.timestamp}');
+            // log.d('assistantMessageIndex: $assistantMessageIndex');
+            // log.d('assistantMessage.isLoading: ${assistantMessage.isLoading}');
+            // log.d('assistantMessage.senderId: ${assistantMessage.senderId}');
+            // log.d('assistantMessage.timestamp: ${assistantMessage.timestamp}');
 
             setState(() {
               Provider.of<ConversationProvider>(context, listen: false)

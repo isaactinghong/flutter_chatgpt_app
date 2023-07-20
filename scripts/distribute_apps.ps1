@@ -1,5 +1,6 @@
 # configure the target distribution folder path here
-$targetDistributionFolder = "D:\Google Drive\Work\ZACDEV\ZD Projects\ChatGPT Flutter"
+# $targetDistributionFolder = "D:\Google Drive\Work\ZACDEV\ZD Projects\ChatGPT Flutter"
+$targetDistributionFolder = "C:\Users\isaac\Google Drive\Work\ZACDEV\ZD Projects\ChatGPT Flutter"
 
 # set location at the current script location
 Set-Location -Path $PSScriptRoot
