@@ -1,3 +1,7 @@
+## [1.0.10]
+
+* Added loading spinner to the assistant avator when streaming result
+
 ## [1.0.9]
 
 * Fixed Chinese issue. no need to utf8.decode

@@ -218,7 +218,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       return constructAssistantMessage(
         tempMessage,
-        isLoading: false,
+        isLoading: true,
       );
     });
 
@@ -263,7 +263,7 @@ class _ChatPageState extends State<ChatPage> {
 
         final userMessage = constructUserMessage(text);
         final assistantLoadingMessage = constructAssistantMessage(
-          'Loading...',
+          '',
           isLoading: true,
         );
 
@@ -307,6 +307,18 @@ class _ChatPageState extends State<ChatPage> {
           }, onDone: () {
             // log onDone
             log.d('_sendMessage onDone');
+
+            // modify the message to remove the loading spinner
+            final assistantMessage = constructAssistantMessage(
+              providerInner.currentConversation.messages[assistantMessageIndex]
+                  .content,
+              isLoading: false,
+            );
+
+            setState(() {
+              Provider.of<ConversationProvider>(context, listen: false)
+                  .modifyMessage(assistantMessageIndex, assistantMessage);
+            });
 
             // ask for a topic
             _askTopic(providerInner.currentConversationMessages).then((topic) {
@@ -379,10 +391,28 @@ class _ChatPageState extends State<ChatPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (message.senderId != userSender.id)
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(systemSender.avatarAssetPath),
-                                radius: 16.0,
+                              Stack(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundImage:
+                                        AssetImage(systemSender.avatarAssetPath),
+                                    radius: 16.0,
+                                  ),
+                                  // show loading spinner if message is loading
+                                  if (message.isLoading)
+                                    Positioned.fill(
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: SizedBox(
+                                          height: 16.0,
+                                          width: 16.0,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               )
                             else
                               const SizedBox(width: 24.0),
@@ -409,15 +439,16 @@ class _ChatPageState extends State<ChatPage> {
                                     ],
                                   ),
                                   child: Builder(builder: (context) {
-                                    if (message.isLoading) {
-                                      return const SizedBox(
-                                        height: 16.0,
-                                        width: 16.0,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.0,
-                                        ),
-                                      );
-                                    }
+                                    // not needed anymore because we stream the message from openai
+                                    // if (message.isLoading) {
+                                    //   return const SizedBox(
+                                    //     height: 16.0,
+                                    //     width: 16.0,
+                                    //     child: CircularProgressIndicator(
+                                    //       strokeWidth: 2.0,
+                                    //     ),
+                                    //   );
+                                    // }
                                     return SelectableText(
                                       message.content,
                                       style: TextStyle(
