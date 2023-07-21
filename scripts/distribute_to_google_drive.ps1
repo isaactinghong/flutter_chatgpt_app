@@ -8,8 +8,6 @@ Write-Output "Target distribution folder: $env:TARGET_DISTRIBUTION_FOLDER"
 
 # set location at the current script location
 Set-Location -Path $PSScriptRoot
-
-# navigate to root "cd .."
 Set-Location -Path ".."
 
 # read the version number from pubspec.yaml
@@ -27,6 +25,9 @@ New-Item -ItemType Directory -Force -Path v$version
 # navigate back to root
 Set-Location -Path $PSScriptRoot
 Set-Location -Path ".."
+
+# copy CHANGELOG.md to target distribution folder
+Copy-Item -Path "CHANGELOG.md" -Destination $env:TARGET_DISTRIBUTION_FOLDER\v$version\CHANGELOG.md -Force
 
 
 # Flutter build into windows
