@@ -21,13 +21,14 @@ $version = (Get-Content pubspec.yaml | Select-String "version:").ToString().Spli
 Write-Output $version
 
 # cd to target distribution folder: D:\Google Drive\Work\ZACDEV\ZD Projects\ChatGPT Flutter
-Set-Location -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\
+# Set-Location -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\
 
 
 # gh release create with CHANGELOG.md
 gh release create v$version -F CHANGELOG.md
 
-# gh release upload every zip files in the folder
-Get-ChildItem -Path .\*.zip | ForEach-Object {
+# gh release upload every zip/apk files in the folder
+# Get-ChildItem -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\*.zip | ForEach-Object {
+Get-ChildItem -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\* -Include *.zip, *.apk | ForEach-Object {
   gh release upload v$version $_.FullName
 }
