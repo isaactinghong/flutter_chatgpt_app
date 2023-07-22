@@ -1,3 +1,7 @@
+## [1.0.11]
+
+* Added system message input support to top of menu drawer
+
 ## [1.0.10]
 
 * Added loading spinner to the assistant avator when streaming result

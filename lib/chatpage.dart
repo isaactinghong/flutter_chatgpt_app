@@ -162,6 +162,13 @@ class _ChatPageState extends State<ChatPage> {
 
     // prepare messages into List<OpenAIChatCompletionChoiceMessageModel> openAIMessages
     List<OpenAIChatCompletionChoiceMessageModel> openAIMessages = [];
+
+    // add system message to instruct OpenAI to generate what kind of response
+    openAIMessages.add(OpenAIChatCompletionChoiceMessageModel(
+      content: Provider.of<AppProvider>(context, listen: false).systemMessage,
+      role: OpenAIChatMessageRole.system,
+    ));
+
     for (var message in messages) {
       // convert message['role'] into OpenAIChatMessageRole.user or OpenAIChatMessageRole.assistant
       openAIMessages.add(OpenAIChatCompletionChoiceMessageModel(
@@ -310,8 +317,8 @@ class _ChatPageState extends State<ChatPage> {
 
             // modify the message to remove the loading spinner
             final assistantMessage = constructAssistantMessage(
-              providerInner.currentConversation.messages[assistantMessageIndex]
-                  .content,
+              providerInner
+                  .currentConversation.messages[assistantMessageIndex].content,
               isLoading: false,
             );
 
@@ -394,8 +401,8 @@ class _ChatPageState extends State<ChatPage> {
                               Stack(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage:
-                                        AssetImage(systemSender.avatarAssetPath),
+                                    backgroundImage: AssetImage(
+                                        systemSender.avatarAssetPath),
                                     radius: 16.0,
                                   ),
                                   // show loading spinner if message is loading

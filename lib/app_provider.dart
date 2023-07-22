@@ -12,6 +12,9 @@ class AppProvider extends ChangeNotifier {
 
   late String changelogContent = "";
 
+  /// systemMessage, a string that stores the system message, to be sent to the chatbot as first message
+  String systemMessage = "Chat with me.";
+
   /// setGptModel, a setter that sets the GPT model name
   // set it to shared preferences
   setGptModel(String newGPTModel) async {
@@ -19,6 +22,16 @@ class AppProvider extends ChangeNotifier {
     // set gpt model to shared preferences. key: gptModel
     prefs.setString("gptModel", newGPTModel);
     gptModel = newGPTModel;
+    notifyListeners();
+  }
+
+  /// setSystemMessage, a setter that sets the system message
+  /// set it to shared preferences
+  setSystemMessage(String newSystemMessage) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // set system message to shared preferences. key: systemMessage
+    prefs.setString("systemMessage", newSystemMessage);
+    systemMessage = newSystemMessage;
     notifyListeners();
   }
 
@@ -35,6 +48,9 @@ class AppProvider extends ChangeNotifier {
 
     // load gpt model from shared preferences
     loadGptModel();
+
+    // load system message from shared preferences
+    loadSystemMessage();
   }
 
   void loadGptModel() {
@@ -52,5 +68,14 @@ class AppProvider extends ChangeNotifier {
           changelogContent = value,
           notifyListeners(),
         });
+  }
+
+  void loadSystemMessage() {
+    SharedPreferences.getInstance().then((prefs) {
+      if (prefs.containsKey("systemMessage")) {
+        systemMessage = prefs.getString("systemMessage") ?? "Chat with me.";
+      }
+      notifyListeners();
+    });
   }
 }
