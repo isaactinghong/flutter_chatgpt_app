@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'app_provider.dart';
 import 'conversation_provider.dart';
@@ -232,6 +233,43 @@ class MenuDrawer extends StatelessWidget {
                       applicationVersion:
                           'Version ${Provider.of<AppProvider>(context, listen: false).versionNumber()}',
                       children: [
+                        // releases page url: https://github.com/isaactinghong/flutter_chatgpt_app/releases/
+                        // show the url link the the github releases page
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Latest Releases:',
+                                style: TextStyle(
+                                  fontFamily: 'din-regular',
+                                  color: Colors.grey[700],
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              GestureDetector(
+                                onTap: () async {
+                                  // open the url in browser using url_launcher package
+                                  final Uri url = Uri.parse(
+                                      'https://github.com/isaactinghong/flutter_chatgpt_app/releases/');
+                                  if (!await launchUrl(url)) {
+                                    throw Exception('Could not launch $url');
+                                  }
+                                },
+                                child: Text(
+                                  'https://github.com/isaactinghong/flutter_chatgpt_app/releases/',
+                                  style: TextStyle(
+                                    fontFamily: 'din-regular',
+                                    color: Colors.grey[700],
+                                    fontSize: 18.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.8,
                           // width is required to display the markdown content
