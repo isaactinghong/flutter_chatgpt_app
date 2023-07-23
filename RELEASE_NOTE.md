@@ -1,4 +1,4 @@
-﻿## [1.0.12]
+﻿## [1.0.13]
 
-* Menu drawer: put "system message input" to bottom of drawer
-* Menu drawer: conversation dismissable
+* Added GitHub releases url to version log
+
