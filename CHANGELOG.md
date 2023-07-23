@@ -1,3 +1,7 @@
+## [1.0.13]
+
+* Added GitHub releases url to version log
+
 ## [1.0.12]
 
 * Menu drawer: put "system message input" to bottom of drawer
