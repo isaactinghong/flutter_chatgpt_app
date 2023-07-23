@@ -1,3 +1,8 @@
+## [1.0.12]
+
+* Menu drawer: put "system message input" to bottom of drawer
+* Menu drawer: conversation dismissable
+
 ## [1.0.11]
 
 * Added system message input support to top of menu drawer

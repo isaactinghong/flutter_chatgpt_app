@@ -18,50 +18,6 @@ class MenuDrawer extends StatelessWidget {
           resizeToAvoidBottomInset: true,
           body: Column(
             children: [
-              // add a input field to change the system message
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'System Message: ',
-                        style: TextStyle(
-                          fontFamily: 'din-regular',
-                          color: Colors.grey[700],
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      TextField(
-                        // autofocus: true,
-                        maxLines: 2,
-                        controller: TextEditingController(
-                          text: Provider.of<AppProvider>(context, listen: true)
-                              .systemMessage,
-                        ),
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (value) {
-                          Provider.of<AppProvider>(context, listen: false)
-                              .setSystemMessage(value);
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Chat with me.',
-                          hintStyle: TextStyle(
-                            fontFamily: 'din-regular',
-                            color: Colors.grey[700],
-                            fontSize: 18.0,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
               Container(
                 margin: const EdgeInsets.all(16.0),
                 child: GestureDetector(
@@ -100,12 +56,16 @@ class MenuDrawer extends StatelessWidget {
                 child: Consumer<ConversationProvider>(
                   builder: (context, conversationProvider, child) {
                     return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
                       itemCount: conversationProvider.conversations.length,
                       itemBuilder: (BuildContext context, int index) {
                         Conversation conversation =
                             conversationProvider.conversations[index];
                         return Dismissible(
                           key: UniqueKey(),
+                          onDismissed: (direction) {
+                            conversationProvider.removeConversation(index);
+                          },
                           child: GestureDetector(
                             onTap: () {
                               conversationProvider.currentConversationIndex =
@@ -163,8 +123,51 @@ class MenuDrawer extends StatelessWidget {
                   },
                 ),
               ),
+              // add a input field to change the system message
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'System Message: ',
+                        style: TextStyle(
+                          fontFamily: 'din-regular',
+                          color: Colors.grey[700],
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      TextField(
+                        // autofocus: true,
+                        maxLines: 2,
+                        controller: TextEditingController(
+                          text: Provider.of<AppProvider>(context, listen: true)
+                              .systemMessage,
+                        ),
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (value) {
+                          Provider.of<AppProvider>(context, listen: false)
+                              .setSystemMessage(value);
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Chat with me.',
+                          hintStyle: TextStyle(
+                            fontFamily: 'din-regular',
+                            color: Colors.grey[700],
+                            fontSize: 18.0,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-              const SizedBox(height: 20.0),
+              // const SizedBox(height: 20.0),
 
               // add gpt model input field
               Container(
