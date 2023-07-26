@@ -56,6 +56,6 @@ gh release create v$version_without_built_number -F $rootPath\RELEASE_NOTE.md
 
 # gh release upload every zip/apk files in the folder
 # Get-ChildItem -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\*.zip | ForEach-Object {
-Get-ChildItem -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\* -Include *.zip, *.apk | ForEach-Object {
+Get-ChildItem -Path $env:TARGET_DISTRIBUTION_FOLDER\v$version\* -Include *.zip, *.apk, *.exe | ForEach-Object {
   gh release upload v$version_without_built_number $_.FullName
 }
