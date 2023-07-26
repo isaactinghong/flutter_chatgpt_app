@@ -1,3 +1,7 @@
+## [1.0.14]
+
+* Auto focus user message input field when creating new conversation
+
 ## [1.0.13]
 
 * Added GitHub releases url to version log

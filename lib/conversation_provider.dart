@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,6 +54,7 @@ class ConversationProvider extends ChangeNotifier {
     if (prefs.containsKey("apikey")) {
       apikey = prefs.getString("apikey") ?? apikey;
     }
+    OpenAI.apiKey = apikey;
   }
 
   // save API Key to shared_preferences
@@ -62,6 +64,7 @@ class ConversationProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("apikey", newAPIKey);
     apikey = newAPIKey;
+    OpenAI.apiKey = apikey;
   }
 
   // load conversations from shared_preferences

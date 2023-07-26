@@ -86,6 +86,13 @@ class MyApp extends StatelessWidget {
         body: const Center(
           child: ChatPage(),
         ),
+        onDrawerChanged: (isOpened) {
+          // auto focus on ChatPage input field if drawer is closed
+          if (!isOpened) {
+            Provider.of<AppProvider>(context, listen: false)
+                .setFocusOnTextInputField();
+          }
+        },
       ),
     );
   }

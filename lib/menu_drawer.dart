@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/main.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,14 +9,28 @@ import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
 import 'models/conversation.dart';
 
-class MenuDrawer extends StatelessWidget {
+class MenuDrawer extends StatefulWidget {
   const MenuDrawer({super.key});
+
+  @override
+  State<MenuDrawer> createState() => _MenuDrawerState();
+}
+
+class _MenuDrawerState extends State<MenuDrawer> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  /// initState, a function that is called when the widget is created
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: SafeArea(
         child: Scaffold(
+          key: scaffoldKey,
           resizeToAvoidBottomInset: true,
           body: Column(
             children: [

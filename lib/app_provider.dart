@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +16,11 @@ class AppProvider extends ChangeNotifier {
 
   /// systemMessage, a string that stores the system message, to be sent to the chatbot as first message
   String systemMessage = "Chat with me.";
+
+  /// textInputFocusEventEmitter, a EventEmitter that emits focus events
+  /// it is used to set the focus on the input field
+  StreamController<void> textInputFocusEventEmitter =
+      StreamController.broadcast();
 
   /// setGptModel, a setter that sets the GPT model name
   // set it to shared preferences
@@ -77,5 +84,10 @@ class AppProvider extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  /// setFocusOnInputField, a setter that sets the focus on the input field
+  void setFocusOnTextInputField() {
+    textInputFocusEventEmitter.sink.add(null);
   }
 }

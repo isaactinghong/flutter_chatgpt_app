@@ -29,7 +29,9 @@ class _ChatPageState extends State<ChatPage> {
   final http.Client _client = http.Client();
   bool _isBottom = true;
 
-  // final FocusNode _focusNode = FocusNode();
+  /// textInputFocusEventEmitter, a EventEmitter from AppProvider
+  late StreamController<void> textInputFocusEventEmitter;
+
   late final _focusNode = FocusNode(
     onKey: (FocusNode node, RawKeyEvent evt) {
       if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
@@ -74,6 +76,16 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+
+    // register focusNode into AppProvider
+    textInputFocusEventEmitter =
+        Provider.of<AppProvider>(context, listen: false)
+            .textInputFocusEventEmitter;
+
+    // listen to textInputFocusEventEmitter
+    textInputFocusEventEmitter.stream.listen((event) {
+      _focusNode.requestFocus();
+    });
   }
 
   // constructUserMessage, construct a Message object from user
@@ -198,6 +210,14 @@ class _ChatPageState extends State<ChatPage> {
       log.d('openai response: $event');
 
       OpenAIStreamChatCompletionModel openAIStreamChatCompletionModel = event;
+
+      // TODO: handle error
+      // if the response is error, show the error message
+      // if (openAIStreamChatCompletionModel.error != null) {
+      //   return constructAssistantMessage(
+      //     'Error: ${openAIStreamChatCompletionModel.error}',
+      //   );
+      // }
 
       // get the completion from the response
       final completions = openAIStreamChatCompletionModel.choices;
@@ -364,13 +384,6 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(
     BuildContext context,
   ) {
-    // listen to apikey to see if changed
-    final openAiApiKey =
-        Provider.of<ConversationProvider>(context, listen: true).yourapikey;
-
-    // set the api key to OpenAi
-    OpenAI.apiKey = openAiApiKey;
-
     return Scaffold(
       body: Column(
         children: [
