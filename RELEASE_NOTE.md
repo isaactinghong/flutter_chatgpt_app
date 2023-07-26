@@ -1,4 +1,5 @@
-﻿## [1.0.13]
+﻿## [1.0.14]
 
-* Added GitHub releases url to version log
+* Auto focus user message input field when creating new conversation
+* Optimized apiKey settings
 

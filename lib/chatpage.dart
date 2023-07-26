@@ -58,6 +58,23 @@ class _ChatPageState extends State<ChatPage> {
             text: newText,
             selection: newSelection,
           );
+
+          // calculate number of lines before selection
+          final textBeforeSelection = text.substring(0, selection.start);
+          final numberOfLinesBeforeSelection =
+              textBeforeSelection.split('\n').length;
+
+          // log
+          log.d('numberOfLinesBeforeSelection: $numberOfLinesBeforeSelection');
+
+          // get selection position in double
+          final selectionPosition = numberOfLinesBeforeSelection * 19;
+          double selectionPositionDouble = selectionPosition.toDouble();
+
+          // scroll to the selection position
+          _textInputScrollController.animateTo(selectionPositionDouble,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut);
         }
         return KeyEventResult.handled;
       } else {
@@ -65,6 +82,8 @@ class _ChatPageState extends State<ChatPage> {
       }
     },
   );
+
+  final ScrollController _textInputScrollController = ScrollController();
 
   @override
   void dispose() {
@@ -420,7 +439,7 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                   // show loading spinner if message is loading
                                   if (message.isLoading)
-                                    Positioned.fill(
+                                    const Positioned.fill(
                                       child: Align(
                                         alignment: Alignment.center,
                                         child: SizedBox(
@@ -518,6 +537,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: TextField(
                       minLines: 1,
                       maxLines: 6,
+                      scrollController: _textInputScrollController,
                       autofocus: true,
                       focusNode: _focusNode,
                       keyboardType: TextInputType.multiline,
