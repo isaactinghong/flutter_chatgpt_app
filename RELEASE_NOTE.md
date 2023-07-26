@@ -1,5 +1,4 @@
-﻿## [1.0.14]
+﻿## [1.0.15]
 
-* Auto focus user message input field when creating new conversation
-* Optimized apiKey settings
+* Auto scroll to correct position when shift+enter newline in text input
 
