@@ -1,3 +1,7 @@
+## [1.0.15]
+
+* Auto scroll to correct position when shift+enter newline in text input
+
 ## [1.0.14]
 
 * Auto focus user message input field when creating new conversation
