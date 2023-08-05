@@ -4,7 +4,6 @@ import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'main.dart';
 import 'models/conversation.dart';
 import 'models/message.dart';
 
