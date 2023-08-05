@@ -1,3 +1,8 @@
+## [1.0.16]
+
+* Added multiline support to OpenAI system message input
+* Display the API Key in "API Settings"
+
 ## [1.0.15]
 
 * Auto scroll to correct position when shift+enter newline in text input

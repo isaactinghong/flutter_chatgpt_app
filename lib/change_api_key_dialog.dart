@@ -8,11 +8,13 @@ void showChangeAPIKeyDialog(BuildContext context) async {
     builder: (BuildContext context) {
       String newAPIKey = 'YOUR_API_KEY';
       return AlertDialog(
-        title: const Text('API Setting'),
+        title: const Text('API Settings'),
         content: TextField(
-          // display the current name of the conversation
           decoration: InputDecoration(
               hintText: Provider.of<ConversationProvider>(context).yourapikey),
+          // display the text of the current API Key
+          controller: TextEditingController(
+              text: Provider.of<ConversationProvider>(context).yourapikey),
           onChanged: (value) {
             newAPIKey = value;
           },

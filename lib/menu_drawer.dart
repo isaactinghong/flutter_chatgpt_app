@@ -18,6 +18,9 @@ class MenuDrawer extends StatefulWidget {
 class _MenuDrawerState extends State<MenuDrawer> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// system message controller
+  final TextEditingController systemMessageController = TextEditingController();
+
   /// initState, a function that is called when the widget is created
   @override
   void initState() {
@@ -26,6 +29,10 @@ class _MenuDrawerState extends State<MenuDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    // initialize the system message controller text: Provider.of<AppProvider>(context, listen: true).systemMessage
+    systemMessageController.text =
+        Provider.of<AppProvider>(context, listen: true).systemMessage;
+
     return Drawer(
       child: SafeArea(
         child: Scaffold(
@@ -157,12 +164,13 @@ class _MenuDrawerState extends State<MenuDrawer> {
                       ),
                       TextField(
                         // autofocus: true,
-                        maxLines: 2,
-                        controller: TextEditingController(
-                          text: Provider.of<AppProvider>(context, listen: true)
-                              .systemMessage,
-                        ),
-                        textInputAction: TextInputAction.done,
+                        maxLines: 3,
+                        controller: systemMessageController,
+                        textInputAction: TextInputAction.newline,
+                        onTapOutside: (value) {
+                          Provider.of<AppProvider>(context, listen: false)
+                              .setSystemMessage(systemMessageController.text);
+                        },
                         onSubmitted: (value) {
                           Provider.of<AppProvider>(context, listen: false)
                               .setSystemMessage(value);
@@ -314,7 +322,7 @@ class _MenuDrawerState extends State<MenuDrawer> {
                       Icon(Icons.settings, color: Colors.grey[700], size: 20.0),
                       const SizedBox(width: 15.0),
                       Text(
-                        'API Setting',
+                        'API Settings',
                         style: TextStyle(
                           fontFamily: 'din-regular',
                           color: Colors.grey[700],
