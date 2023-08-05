@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
+import 'helpers/copy_conversation_to_clipboard.dart';
+import 'helpers/save_conversation_as_txt.dart';
 import 'main.dart';
 import 'models/message.dart';
 import 'models/sender.dart';
@@ -404,162 +406,168 @@ class _ChatPageState extends State<ChatPage> {
     BuildContext context,
   ) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<ConversationProvider>(
-              builder: (context, conversationProvider, child) {
-                return NotificationListener(
-                  onNotification: (notification) {
-                    if (notification is ScrollEndNotification) {
-                      setState(() => _isBottom =
-                          _scrollController.position.extentAfter == 0);
-                    }
-                    return true;
-                  },
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: conversationProvider.currentConversationLength,
-                    itemBuilder: (BuildContext context, int index) {
-                      Message message = conversationProvider
-                          .currentConversation.messages[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (message.senderId != userSender.id)
-                              Stack(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                        systemSender.avatarAssetPath),
-                                    radius: 16.0,
-                                  ),
-                                  // show loading spinner if message is loading
-                                  if (message.isLoading)
-                                    const Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SizedBox(
-                                          height: 16.0,
-                                          width: 16.0,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.0,
+      body: GestureDetector(
+        onSecondaryTapUp: (details) {
+          showContextMenuForConversation(details);
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: Consumer<ConversationProvider>(
+                builder: (context, conversationProvider, child) {
+                  return NotificationListener(
+                    onNotification: (notification) {
+                      if (notification is ScrollEndNotification) {
+                        setState(() => _isBottom =
+                            _scrollController.position.extentAfter == 0);
+                      }
+                      return true;
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: conversationProvider.currentConversationLength,
+                      itemBuilder: (BuildContext context, int index) {
+                        Message message = conversationProvider
+                            .currentConversation.messages[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (message.senderId != userSender.id)
+                                Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundImage: AssetImage(
+                                          systemSender.avatarAssetPath),
+                                      radius: 16.0,
+                                    ),
+                                    // show loading spinner if message is loading
+                                    if (message.isLoading)
+                                      const Positioned.fill(
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: SizedBox(
+                                            height: 16.0,
+                                            width: 16.0,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.0,
+                                            ),
                                           ),
                                         ),
                                       ),
+                                  ],
+                                )
+                              else
+                                const SizedBox(width: 24.0),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: Align(
+                                  alignment: message.senderId == userSender.id
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 16.0),
+                                    decoration: BoxDecoration(
+                                      color: message.senderId == userSender.id
+                                          ? const Color(0xff55bb8e)
+                                          : Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
-                                ],
-                              )
-                            else
-                              const SizedBox(width: 24.0),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Align(
-                                alignment: message.senderId == userSender.id
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: message.senderId == userSender.id
-                                        ? const Color(0xff55bb8e)
-                                        : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                                    child: Builder(builder: (context) {
+                                      // not needed anymore because we stream the message from openai
+                                      // if (message.isLoading) {
+                                      //   return const SizedBox(
+                                      //     height: 16.0,
+                                      //     width: 16.0,
+                                      //     child: CircularProgressIndicator(
+                                      //       strokeWidth: 2.0,
+                                      //     ),
+                                      //   );
+                                      // }
+                                      return SelectableText(
+                                        message.content,
+                                        style: TextStyle(
+                                          color:
+                                              message.senderId == userSender.id
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                        ),
+                                      );
+                                    }),
                                   ),
-                                  child: Builder(builder: (context) {
-                                    // not needed anymore because we stream the message from openai
-                                    // if (message.isLoading) {
-                                    //   return const SizedBox(
-                                    //     height: 16.0,
-                                    //     width: 16.0,
-                                    //     child: CircularProgressIndicator(
-                                    //       strokeWidth: 2.0,
-                                    //     ),
-                                    //   );
-                                    // }
-                                    return SelectableText(
-                                      message.content,
-                                      style: TextStyle(
-                                        color: message.senderId == userSender.id
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    );
-                                  }),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            if (message.senderId == userSender.id)
-                              CircleAvatar(
-                                backgroundImage:
-                                    AssetImage(userSender.avatarAssetPath),
-                                radius: 16.0,
-                              )
-                            else
-                              const SizedBox(width: 24.0),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                              const SizedBox(width: 8.0),
+                              if (message.senderId == userSender.id)
+                                CircleAvatar(
+                                  backgroundImage:
+                                      AssetImage(userSender.avatarAssetPath),
+                                  radius: 16.0,
+                                )
+                              else
+                                const SizedBox(width: 24.0),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
 
-          // input box
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(32.0),
-            ),
-            margin:
-                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-            padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _focusNode.requestFocus(),
-                    child: TextField(
-                      minLines: 1,
-                      maxLines: 6,
-                      scrollController: _textInputScrollController,
-                      autofocus: true,
-                      focusNode: _focusNode,
-                      keyboardType: TextInputType.multiline,
-                      // textInputAction: TextInputAction.newline,
-                      textInputAction: Platform.isWindows
-                          ? TextInputAction.done
-                          : TextInputAction.newline,
-                      controller: _textController,
-                      decoration: const InputDecoration.collapsed(
-                          hintText: 'Type your message...'),
-                      // onSubmitted: (_) => _onSubmitMessage(),
+            // input box
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(32.0),
+              ),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _focusNode.requestFocus(),
+                      child: TextField(
+                        minLines: 1,
+                        maxLines: 6,
+                        scrollController: _textInputScrollController,
+                        autofocus: true,
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.multiline,
+                        // textInputAction: TextInputAction.newline,
+                        textInputAction: Platform.isWindows
+                            ? TextInputAction.done
+                            : TextInputAction.newline,
+                        controller: _textController,
+                        decoration: const InputDecoration.collapsed(
+                            hintText: 'Type your message...'),
+                        // onSubmitted: (_) => _onSubmitMessage(),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _onSubmitMessage,
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _onSubmitMessage,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
 
@@ -578,5 +586,64 @@ class _ChatPageState extends State<ChatPage> {
     //   onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
     //   child:
     // );
+  }
+
+  void showContextMenuForConversation(
+    TapUpDetails tapUpDetails,
+  ) {
+    // log entry
+    log.d('showContextMenuForConversation');
+
+    // show a context menu
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        tapUpDetails.globalPosition.dx,
+        tapUpDetails.globalPosition.dy,
+        tapUpDetails.globalPosition.dx,
+        tapUpDetails.globalPosition.dy,
+      ),
+      items: [
+        // copy to clipboard
+        const PopupMenuItem(
+          value: 'copy_to_clipboard',
+          // shorter
+          height: 22.0,
+          child: Text(
+            'Copy conversation to clipboard',
+            // smaller font
+            style: TextStyle(
+              fontSize: 12.0,
+            ),
+          ),
+        ),
+        // save as txt
+        const PopupMenuItem(
+          value: 'save_as_txt',
+          // shorter
+          height: 22.0,
+          child: Text(
+            'Save conversation as .txt',
+            // smaller font
+            style: TextStyle(
+              fontSize: 12.0,
+            ),
+          ),
+        ),
+      ],
+      elevation: 8.0,
+      // smaller size
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+    ).then((value) {
+      if (value == 'copy_to_clipboard') {
+        // copy the conversation to clipboard
+        copyConversationToClipboard(context);
+      } else if (value == 'save_as_txt') {
+        // save the conversation as txt
+        saveConversationAsTxt(context);
+      }
+    });
   }
 }

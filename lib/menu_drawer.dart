@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
+import 'main.dart';
 import 'models/conversation.dart';
 
 class MenuDrawer extends StatefulWidget {
@@ -44,6 +45,8 @@ class _MenuDrawerState extends State<MenuDrawer> {
                 margin: const EdgeInsets.all(16.0),
                 child: GestureDetector(
                   onTap: () {
+                    // log entry
+                    log.d('add new conversation');
                     Provider.of<ConversationProvider>(context, listen: false)
                         .addEmptyConversation('');
                     Navigator.pop(context);
@@ -84,12 +87,16 @@ class _MenuDrawerState extends State<MenuDrawer> {
                         Conversation conversation =
                             conversationProvider.conversations[index];
                         return Dismissible(
-                          key: UniqueKey(),
+                          key: Key(conversation.title),
                           onDismissed: (direction) {
                             conversationProvider.removeConversation(index);
                           },
                           child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () {
+                              // log entry
+                              log.d(
+                                  'current conversation index: $index, title: ${conversation.title}');
                               conversationProvider.currentConversationIndex =
                                   index;
                               Navigator.pop(context);

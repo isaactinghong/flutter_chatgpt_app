@@ -2,6 +2,8 @@
 
 * Added multiline support to OpenAI system message input
 * Display the API Key in "API Settings"
+* Added copy conversation to clipboard
+* Added save conversation to file
 
 ## [1.0.15]
 
