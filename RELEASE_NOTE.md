@@ -1,4 +1,6 @@
-﻿## [1.0.17]
+﻿## [1.0.18]
 
-* Removed save conversation to file icon in AppBar
+* Do not auto focus gpt model input field when opening menu drawer
+* Fixed error is shown in system user's message when failed to send message or OpenAI API returns error
+* Added auto-suggestion for message input field
 
