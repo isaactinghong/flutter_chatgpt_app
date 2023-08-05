@@ -217,7 +217,7 @@ class _MenuDrawerState extends State<MenuDrawer> {
                     ),
                     Expanded(
                       child: TextField(
-                        autofocus: true,
+                        // autofocus: true,
                         controller: TextEditingController(
                           text: Provider.of<AppProvider>(context, listen: true)
                               .gptModel,

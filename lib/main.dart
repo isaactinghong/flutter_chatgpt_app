@@ -114,12 +114,12 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  _saveConversationToTxtButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.save),
-      onPressed: () {
-        saveConversationAsTxt(context);
-      },
-    );
-  }
+  // _saveConversationToTxtButton(BuildContext context) {
+  //   return IconButton(
+  //     icon: const Icon(Icons.save),
+  //     onPressed: () {
+  //       saveConversationAsTxt(context);
+  //     },
+  //   );
+  // }
 }

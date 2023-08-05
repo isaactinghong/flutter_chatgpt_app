@@ -31,11 +31,11 @@ class ConversationProvider extends ChangeNotifier {
   // ],
   List<Map<String, String>> get currentConversationMessages {
     List<Map<String, String>> messages = [
-      {
-        'role': "system",
-        'content':
-            "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."
-      }
+      // {
+      //   'role': "system",
+      //   'content':
+      //       "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."
+      // }
     ];
     for (Message message
         in _conversations[_currentConversationIndex].messages) {

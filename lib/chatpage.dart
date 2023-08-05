@@ -1,16 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
+import 'helpers/ask_topic.dart';
+import 'helpers/auto_complete_message.dart';
 import 'helpers/copy_conversation_to_clipboard.dart';
 import 'helpers/save_conversation_as_txt.dart';
 import 'main.dart';
@@ -34,8 +36,31 @@ class _ChatPageState extends State<ChatPage> {
   /// textInputFocusEventEmitter, a EventEmitter from AppProvider
   late StreamController<void> textInputFocusEventEmitter;
 
+  /// SuggestionsBoxController for TypeAheadFormField
+  late SuggestionsBoxController suggestionsBoxController =
+      SuggestionsBoxController();
+
   late final _focusNode = FocusNode(
     onKey: (FocusNode node, RawKeyEvent evt) {
+      // if the key pressed is Escape, unfocus the textfield and hide the suggestions box
+      if (evt.logicalKey.keyLabel == 'Escape') {
+        if (evt is RawKeyDownEvent) {
+          node.unfocus();
+          suggestionsBoxController.close();
+        }
+        return KeyEventResult.handled;
+      }
+      // else if the key is up, move the selection up
+      else if (evt.logicalKey.keyLabel == 'ArrowUp') {
+        if (evt is RawKeyDownEvent) {
+          suggestionsBoxController.open();
+        }
+        return KeyEventResult.handled;
+      }
+
+      // if the key pressed is others, show the suggestions box
+      // suggestionsBoxController.open();
+
       if (!evt.isShiftPressed && evt.logicalKey.keyLabel == 'Enter') {
         if (evt is RawKeyDownEvent) {
           _onSubmitMessage();
@@ -124,69 +149,6 @@ class _ChatPageState extends State<ChatPage> {
         senderId: systemSender.id, content: text, isLoading: isLoading);
   }
 
-  // _askTopic, ask OpenAI to give a topic for the conversation
-  // inputs are the messages in the conversation
-  // output is a topic for the conversation
-  Future<String?> _askTopic(List<Map<String, String>> messages) async {
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-    final apiKey =
-        Provider.of<ConversationProvider>(context, listen: false).yourapikey;
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
-    };
-
-    // add a message to tell OpenAI to give a topic
-    messages.add({
-      'role': 'system',
-      'content': '''Give me a conversation title based on our messages.
-          Only give the title text.
-          The title should be short and clear.
-          The title should not exceed 20 words.
-          Do not start with "Conversation Title:" or "Topic:" or "The topic of this conversation is".
-          Do not end with something like "would be a potential conversation title for your messages".
-          Do not end with a period character.
-          Do not use quotation mark to quote the entire title.
-          If you are not sure, just give the title: Unclear topic.''',
-    });
-
-    log.d('messages for askTopic: $messages');
-
-    // send all current conversation to OpenAI
-    final body = {
-      // use AppProvider.gptModel as model name
-      'model': Provider.of<AppProvider>(context, listen: false).gptModel,
-      'messages': messages,
-    };
-
-    try {
-      final response =
-          await _client.post(url, headers: headers, body: json.encode(body));
-
-      log.d('openai response: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final completions = data['choices'] as List<dynamic>;
-        if (completions.isNotEmpty) {
-          final completion = completions[0];
-          final content = completion['message']['content'] as String;
-
-          final decodedContent = utf8.decode(content.codeUnits);
-
-          // delete all the prefix '\n' in content
-          return decodedContent.replaceFirst(RegExp(r'^\n+'), '');
-        }
-      }
-    } catch (e) {
-      log.e('_askTopic error: $e', e);
-
-      // return the error message
-      return 'Error: $e';
-    }
-    return null;
-  }
-
   // Send message to OpenAI
   Stream<Message> _sendMessage(List<Map<String, String>> messages) {
     final openAiUri = Uri.parse('https://api.openai.com/v1/chat/completions');
@@ -231,14 +193,6 @@ class _ChatPageState extends State<ChatPage> {
       log.d('openai response: $event');
 
       OpenAIStreamChatCompletionModel openAIStreamChatCompletionModel = event;
-
-      // TODO: handle error
-      // if the response is error, show the error message
-      // if (openAIStreamChatCompletionModel.error != null) {
-      //   return constructAssistantMessage(
-      //     'Error: ${openAIStreamChatCompletionModel.error}',
-      //   );
-      // }
 
       // get the completion from the response
       final completions = openAIStreamChatCompletionModel.choices;
@@ -369,11 +323,28 @@ class _ChatPageState extends State<ChatPage> {
             });
 
             // ask for a topic
-            _askTopic(providerInner.currentConversationMessages).then((topic) {
+            askTopic(
+              messages: providerInner.currentConversationMessages,
+              context: context,
+              client: _client,
+            ).then((topic) {
               if (topic != null) {
                 // modify the conversation title
                 providerInner.changeConversationTitle(topic);
               }
+            });
+          }, onError: (e) {
+            // log onError
+            log.d('_sendMessage onError: $e');
+
+            // add the error message to the conversation
+            final errorMessage = constructAssistantMessage(
+              'Error: $e',
+            );
+
+            setState(() {
+              Provider.of<ConversationProvider>(context, listen: false)
+                  .modifyMessage(assistantMessageIndex, errorMessage);
             });
           });
         }
@@ -541,21 +512,67 @@ class _ChatPageState extends State<ChatPage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => _focusNode.requestFocus(),
-                      child: TextField(
-                        minLines: 1,
-                        maxLines: 6,
-                        scrollController: _textInputScrollController,
-                        autofocus: true,
-                        focusNode: _focusNode,
-                        keyboardType: TextInputType.multiline,
-                        // textInputAction: TextInputAction.newline,
-                        textInputAction: Platform.isWindows
-                            ? TextInputAction.done
-                            : TextInputAction.newline,
-                        controller: _textController,
-                        decoration: const InputDecoration.collapsed(
-                            hintText: 'Type your message...'),
-                        // onSubmitted: (_) => _onSubmitMessage(),
+                      // child: TextField(
+                      //   minLines: 1,
+                      //   maxLines: 6,
+                      //   scrollController: _textInputScrollController,
+                      //   autofocus: true,
+                      //   focusNode: _focusNode,
+                      //   keyboardType: TextInputType.multiline,
+                      //   // textInputAction: TextInputAction.newline,
+                      //   textInputAction: Platform.isWindows
+                      //       ? TextInputAction.done
+                      //       : TextInputAction.newline,
+                      //   controller: _textController,
+                      //   decoration: const InputDecoration.collapsed(
+                      //       hintText: 'Type your message...'),
+                      //   // onSubmitted: (_) => _onSubmitMessage(),
+                      // ),
+                      child: TypeAheadFormField(
+                        suggestionsBoxController: suggestionsBoxController,
+                        noItemsFoundBuilder: (context) {
+                          // show nothing
+                          return const SizedBox.shrink();
+                        },
+                        textFieldConfiguration: TextFieldConfiguration(
+                          controller: _textController,
+                          decoration: const InputDecoration(
+                            hintText: 'Type your message...',
+                            border: InputBorder.none,
+                          ),
+                          minLines: 1,
+                          maxLines: 6,
+                          textInputAction: Platform.isWindows
+                              ? TextInputAction.done
+                              : TextInputAction.newline,
+                          autofocus: true,
+                          focusNode: _focusNode,
+                        ),
+                        hideOnLoading: true,
+                        debounceDuration: const Duration(milliseconds: 1000),
+                        direction: AxisDirection.up,
+                        suggestionsCallback: (pattern) async {
+                          return await getSuggestions(pattern);
+                        },
+                        itemBuilder: (context, suggestion) {
+                          return ListTile(
+                            title: Text(suggestion),
+                          );
+                        },
+                        transitionBuilder:
+                            (context, suggestionsBox, controller) {
+                          return suggestionsBox;
+                        },
+                        onSuggestionSelected: (suggestion) {
+                          // remove starting "..." from suggestion
+                          suggestion = suggestion.substring(3);
+
+                          _textController.text =
+                              _textController.text + suggestion;
+                        },
+                        onSaved: (value) {
+                          // this._selectedCity = value
+                        },
                       ),
                     ),
                   ),
@@ -645,5 +662,46 @@ class _ChatPageState extends State<ChatPage> {
         saveConversationAsTxt(context);
       }
     });
+  }
+
+  Future<Iterable<String>> getSuggestions(String input) async {
+    var currentMessages =
+        Provider.of<ConversationProvider>(context, listen: false)
+            .currentConversationMessages;
+
+    // check if the input is empty with trim
+    if (input.trim().isEmpty) {
+      return const Iterable.empty();
+    }
+
+    // add the input to the currentMessages
+    currentMessages.add(
+      {
+        'content': input,
+        'role': 'user',
+      },
+    );
+
+    // log about to call autoCompleteMessage
+    log.d('about to call autoCompleteMessage');
+
+    var autoCompleteResult = await autoCompleteMessage(
+      messages: currentMessages,
+      context: context,
+      client: _client,
+    );
+
+    // log autoCompleteResult
+    log.d('autoCompleteResult: $autoCompleteResult');
+
+    if (autoCompleteResult == null) {
+      return const Iterable.empty();
+    }
+
+    // return a list of suggestions based on the input
+    return Iterable.generate(
+      1,
+      (index) => "...$autoCompleteResult",
+    );
   }
 }
