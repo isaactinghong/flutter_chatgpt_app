@@ -1,4 +1,4 @@
-﻿## [1.0.15]
+﻿## [1.0.17]
 
-* Auto scroll to correct position when shift+enter newline in text input
+* Removed save conversation to file icon in AppBar
 

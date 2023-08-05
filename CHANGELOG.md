@@ -1,3 +1,7 @@
+## [1.0.17]
+
+* Removed save conversation to file icon in AppBar
+
 ## [1.0.16]
 
 * Added multiline support to OpenAI system message input

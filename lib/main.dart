@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
               // add a copy icon button
               _copyConversationToClipboardButton(context),
               // add a save icon button
-              _saveConversationToTxtButton(context),
+              // _saveConversationToTxtButton(context),
               const CustomPopupMenu(),
             ],
           ),
