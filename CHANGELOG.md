@@ -1,3 +1,7 @@
+## [1.0.19]
+
+* Limit the number of words auto-suggestion gives to 5
+
 ## [1.0.18]
 
 * Do not auto focus gpt model input field when opening menu drawer

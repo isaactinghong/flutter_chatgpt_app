@@ -29,9 +29,11 @@ Future<String?> autoCompleteMessage({
     {
       'role': 'system',
       'content': '''
-you are auto-complete assistant for the user. please help me finish off my last sentence as i'm typing in my perspective.
-just give me the rest of the sentence from the cursor position of my input.
+you are auto-complete assistant for the user. please help me extend or finish off my last sentence
+Try to suggest in my perspective.
+just give me the suggestion beginning right from the cursor position of my input.
 include the initial space character for the sentence if there should be one.
+only give me at maximum 5 words.
 ''',
     }
   ];

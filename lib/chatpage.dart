@@ -549,7 +549,7 @@ class _ChatPageState extends State<ChatPage> {
                           focusNode: _focusNode,
                         ),
                         hideOnLoading: true,
-                        debounceDuration: const Duration(milliseconds: 1000),
+                        debounceDuration: const Duration(milliseconds: 300),
                         direction: AxisDirection.up,
                         suggestionsCallback: (pattern) async {
                           return await getSuggestions(pattern);
