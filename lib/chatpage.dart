@@ -12,7 +12,7 @@ import 'app_provider.dart';
 import 'conversation_provider.dart';
 import 'change_api_key_dialog.dart';
 import 'helpers/ask_topic.dart';
-import 'helpers/auto_complete_message.dart';
+// import 'helpers/auto_complete_message.dart';
 import 'helpers/copy_conversation_to_clipboard.dart';
 import 'helpers/save_conversation_as_txt.dart';
 import 'main.dart';
@@ -512,68 +512,68 @@ class _ChatPageState extends State<ChatPage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => _focusNode.requestFocus(),
-                      // child: TextField(
-                      //   minLines: 1,
-                      //   maxLines: 6,
-                      //   scrollController: _textInputScrollController,
-                      //   autofocus: true,
-                      //   focusNode: _focusNode,
-                      //   keyboardType: TextInputType.multiline,
-                      //   // textInputAction: TextInputAction.newline,
-                      //   textInputAction: Platform.isWindows
-                      //       ? TextInputAction.done
-                      //       : TextInputAction.newline,
-                      //   controller: _textController,
-                      //   decoration: const InputDecoration.collapsed(
-                      //       hintText: 'Type your message...'),
-                      //   // onSubmitted: (_) => _onSubmitMessage(),
-                      // ),
-                      child: TypeAheadFormField(
-                        suggestionsBoxController: suggestionsBoxController,
-                        noItemsFoundBuilder: (context) {
-                          // show nothing
-                          return const SizedBox.shrink();
-                        },
-                        textFieldConfiguration: TextFieldConfiguration(
-                          controller: _textController,
-                          decoration: const InputDecoration(
-                            hintText: 'Type your message...',
-                            border: InputBorder.none,
-                          ),
-                          minLines: 1,
-                          maxLines: 6,
-                          textInputAction: Platform.isWindows
-                              ? TextInputAction.done
-                              : TextInputAction.newline,
-                          autofocus: true,
-                          focusNode: _focusNode,
-                        ),
-                        hideOnLoading: true,
-                        debounceDuration: const Duration(milliseconds: 1000),
-                        direction: AxisDirection.up,
-                        suggestionsCallback: (pattern) async {
-                          return await getSuggestions(pattern);
-                        },
-                        itemBuilder: (context, suggestion) {
-                          return ListTile(
-                            title: Text(suggestion),
-                          );
-                        },
-                        transitionBuilder:
-                            (context, suggestionsBox, controller) {
-                          return suggestionsBox;
-                        },
-                        onSuggestionSelected: (suggestion) {
-                          // remove starting "..." from suggestion
-                          suggestion = suggestion.substring(3);
-
-                          _textController.text =
-                              _textController.text + suggestion;
-                        },
-                        onSaved: (value) {
-                          // this._selectedCity = value
-                        },
+                      child: TextField(
+                        minLines: 1,
+                        maxLines: 6,
+                        scrollController: _textInputScrollController,
+                        autofocus: true,
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.multiline,
+                        // textInputAction: TextInputAction.newline,
+                        textInputAction: Platform.isWindows
+                            ? TextInputAction.done
+                            : TextInputAction.newline,
+                        controller: _textController,
+                        decoration: const InputDecoration.collapsed(
+                            hintText: 'Type your message...'),
+                        // onSubmitted: (_) => _onSubmitMessage(),
                       ),
+                      // child: TypeAheadFormField(
+                      //   suggestionsBoxController: suggestionsBoxController,
+                      //   noItemsFoundBuilder: (context) {
+                      //     // show nothing
+                      //     return const SizedBox.shrink();
+                      //   },
+                      //   textFieldConfiguration: TextFieldConfiguration(
+                      //     controller: _textController,
+                      //     decoration: const InputDecoration(
+                      //       hintText: 'Type your message...',
+                      //       border: InputBorder.none,
+                      //     ),
+                      //     minLines: 1,
+                      //     maxLines: 6,
+                      //     textInputAction: Platform.isWindows
+                      //         ? TextInputAction.done
+                      //         : TextInputAction.newline,
+                      //     autofocus: true,
+                      //     focusNode: _focusNode,
+                      //   ),
+                      //   hideOnLoading: true,
+                      //   debounceDuration: const Duration(milliseconds: 1000),
+                      //   direction: AxisDirection.up,
+                      //   suggestionsCallback: (pattern) async {
+                      //     return await getSuggestions(pattern);
+                      //   },
+                      //   itemBuilder: (context, suggestion) {
+                      //     return ListTile(
+                      //       title: Text(suggestion),
+                      //     );
+                      //   },
+                      //   transitionBuilder:
+                      //       (context, suggestionsBox, controller) {
+                      //     return suggestionsBox;
+                      //   },
+                      //   onSuggestionSelected: (suggestion) {
+                      //     // remove starting "..." from suggestion
+                      //     suggestion = suggestion.substring(3);
+
+                      //     _textController.text =
+                      //         _textController.text + suggestion;
+                      //   },
+                      //   onSaved: (value) {
+                      //     // this._selectedCity = value
+                      //   },
+                      // ),
                     ),
                   ),
                   IconButton(
@@ -664,44 +664,44 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<Iterable<String>> getSuggestions(String input) async {
-    var currentMessages =
-        Provider.of<ConversationProvider>(context, listen: false)
-            .currentConversationMessages;
+  // Future<Iterable<String>> getSuggestions(String input) async {
+  //   var currentMessages =
+  //       Provider.of<ConversationProvider>(context, listen: false)
+  //           .currentConversationMessages;
 
-    // check if the input is empty with trim
-    if (input.trim().isEmpty) {
-      return const Iterable.empty();
-    }
+  //   // check if the input is empty with trim
+  //   if (input.trim().isEmpty) {
+  //     return const Iterable.empty();
+  //   }
 
-    // add the input to the currentMessages
-    currentMessages.add(
-      {
-        'content': input,
-        'role': 'user',
-      },
-    );
+  //   // add the input to the currentMessages
+  //   currentMessages.add(
+  //     {
+  //       'content': input,
+  //       'role': 'user',
+  //     },
+  //   );
 
-    // log about to call autoCompleteMessage
-    log.d('about to call autoCompleteMessage');
+  //   // log about to call autoCompleteMessage
+  //   log.d('about to call autoCompleteMessage');
 
-    var autoCompleteResult = await autoCompleteMessage(
-      messages: currentMessages,
-      context: context,
-      client: _client,
-    );
+  //   var autoCompleteResult = await autoCompleteMessage(
+  //     messages: currentMessages,
+  //     context: context,
+  //     client: _client,
+  //   );
 
-    // log autoCompleteResult
-    log.d('autoCompleteResult: $autoCompleteResult');
+  //   // log autoCompleteResult
+  //   log.d('autoCompleteResult: $autoCompleteResult');
 
-    if (autoCompleteResult == null) {
-      return const Iterable.empty();
-    }
+  //   if (autoCompleteResult == null) {
+  //     return const Iterable.empty();
+  //   }
 
-    // return a list of suggestions based on the input
-    return Iterable.generate(
-      1,
-      (index) => "...$autoCompleteResult",
-    );
-  }
+  //   // return a list of suggestions based on the input
+  //   return Iterable.generate(
+  //     1,
+  //     (index) => "...$autoCompleteResult",
+  //   );
+  // }
 }

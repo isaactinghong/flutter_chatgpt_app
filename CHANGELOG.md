@@ -1,3 +1,7 @@
+## [1.0.19]
+
+* Removed auto complete suggestion for message input field
+
 ## [1.0.18]
 
 * Do not auto focus gpt model input field when opening menu drawer
