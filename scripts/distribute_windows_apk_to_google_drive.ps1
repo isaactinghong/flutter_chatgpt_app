@@ -38,7 +38,7 @@ flutter build windows --release
 
 # !!! This will install the Windows app on the local machine
 # copy the build output into C:/ChatGPT Flutter/
-# Copy-Item -Path "build\windows\runner\Release\*" -Destination "C:\Program Files (x86)\FlutterGPT" -Recurse -Force
+Copy-Item -Path "build\windows\runner\Release\*" -Destination "C:\Program Files (x86)\FlutterGPT" -Recurse -Force
 
 # use innosetup to create an installer
 # the installer path:  C:\Program Files (x86)\Inno Setup 6\ISCC.exe
