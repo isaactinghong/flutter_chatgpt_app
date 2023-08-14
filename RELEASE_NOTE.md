@@ -1,4 +1,4 @@
-﻿## [1.0.19]
+﻿## [1.0.20]
 
-* Limit the number of words auto-suggestion gives to 5
+* Removed auto complete suggestion for message input field
 
