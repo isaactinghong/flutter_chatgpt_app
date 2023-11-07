@@ -10,12 +10,14 @@ class Message {
   // sender id
   final String senderId;
   final bool isLoading;
+  final List<String>? images; // list of images in base64
 
   Message({
     required this.senderId,
     DateTime? timestamp,
     this.content = '',
     this.isLoading = false,
+    this.images,
   }) : timestamp = timestamp ?? DateTime.now();
 
   // connect to json

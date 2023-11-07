@@ -71,7 +71,7 @@ Future<String?> askTopic({
       }
     }
   } catch (e) {
-    log.e('_askTopic error: $e', e);
+    log.e('_askTopic error: $e');
 
     // return the error message
     return 'Error: $e';

@@ -65,6 +65,12 @@ flutter run
 
 (last updated 2023-03-07)
 
+## Json Serializable
+
+```shell
+dart run build_runner build
+```
+
 ## License
 
 You can use this project for your own further development! Happy developing and chatting!

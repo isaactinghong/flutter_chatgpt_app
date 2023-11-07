@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_openai/dart_openai.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'app_provider.dart';
@@ -29,6 +31,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
+  List<String> _attachedImagesToSend = [];
+
   final ScrollController _scrollController = ScrollController();
   final http.Client _client = http.Client();
   bool _isBottom = true;
@@ -144,17 +148,21 @@ class _ChatPageState extends State<ChatPage> {
   // constructAssistantMessage, construct a Message object from assistant
   // input is the text from assistant
   // output is a Message object
-  Message constructAssistantMessage(String text, {bool isLoading = false}) {
+  Message constructAssistantMessage(
+    String text, {
+    bool isLoading = false,
+    List<String>? images,
+  }) {
     return Message(
-        senderId: systemSender.id, content: text, isLoading: isLoading);
+      senderId: systemSender.id,
+      content: text,
+      isLoading: isLoading,
+      images: images,
+    );
   }
 
   // Send message to OpenAI
   Stream<Message> _sendMessage(List<Map<String, String>> messages) {
-    final openAiUri = Uri.parse('https://api.openai.com/v1/chat/completions');
-    final apiKey =
-        Provider.of<ConversationProvider>(context, listen: false).yourapikey;
-
     // prepare messages into List<OpenAIChatCompletionChoiceMessageModel> openAIMessages
     List<OpenAIChatCompletionChoiceMessageModel> openAIMessages = [];
 
@@ -223,28 +231,6 @@ class _ChatPageState extends State<ChatPage> {
         isLoading: true,
       );
     });
-
-    // log.d('openai response: ${response.body}');
-//     if (response.statusCode == 200) {
-//       final data = json.decode(response.body);
-//       final completions = data['choices'] as List<dynamic>;
-//       if (completions.isNotEmpty) {
-//         final completion = completions[0];
-//         final content = completion['message']['content'] as String;
-//         // delete all the prefix '\n' in content
-//         final contentWithoutPrefix = content.replaceFirst(RegExp(r'^\n+'), '');
-
-//         final decodedContent = utf8.decode(contentWithoutPrefix.codeUnits);
-
-//         return constructAssistantMessage(decodedContent);
-//       }
-//     } else {
-//       // invalid api key
-//       // create a new dialog
-//       return constructAssistantMessage('''Invalid.
-// Status code: ${response.statusCode}.
-// Error: ${response.body}''');
-//     }
   }
 
   // scroll to bottom
@@ -259,6 +245,7 @@ class _ChatPageState extends State<ChatPage> {
   void _sendMessageAndAddToChat() async {
     try {
       final text = _textController.text.trim();
+
       if (text.isNotEmpty) {
         _textController.clear();
         _focusNode.requestFocus();
@@ -267,7 +254,11 @@ class _ChatPageState extends State<ChatPage> {
         final assistantLoadingMessage = constructAssistantMessage(
           '',
           isLoading: true,
+          images: _attachedImagesToSend,
         );
+
+        // clear the attached images
+        _attachedImagesToSend = [];
 
         int assistantMessageIndex = -1;
         ConversationProvider provider =
@@ -350,7 +341,7 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
     } catch (e) {
-      log.e('_sendMessageAndAddToChat error: $e', e);
+      log.e('_sendMessageAndAddToChat error: $e');
 
       // add the error message to the conversation
       final errorMessage = constructAssistantMessage(
@@ -455,16 +446,6 @@ class _ChatPageState extends State<ChatPage> {
                                       ],
                                     ),
                                     child: Builder(builder: (context) {
-                                      // not needed anymore because we stream the message from openai
-                                      // if (message.isLoading) {
-                                      //   return const SizedBox(
-                                      //     height: 16.0,
-                                      //     width: 16.0,
-                                      //     child: CircularProgressIndicator(
-                                      //       strokeWidth: 2.0,
-                                      //     ),
-                                      //   );
-                                      // }
                                       return SelectableText(
                                         message.content,
                                         style: TextStyle(
@@ -496,93 +477,59 @@ class _ChatPageState extends State<ChatPage> {
                 },
               ),
             ),
-
-            // input box
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _focusNode.requestFocus(),
-                      child: TextField(
-                        minLines: 1,
-                        maxLines: 6,
-                        scrollController: _textInputScrollController,
-                        autofocus: true,
-                        focusNode: _focusNode,
-                        keyboardType: TextInputType.multiline,
-                        // textInputAction: TextInputAction.newline,
-                        textInputAction: Platform.isWindows
-                            ? TextInputAction.done
-                            : TextInputAction.newline,
-                        controller: _textController,
-                        decoration: const InputDecoration.collapsed(
-                            hintText: 'Type your message...'),
-                        // onSubmitted: (_) => _onSubmitMessage(),
-                      ),
-                      // child: TypeAheadFormField(
-                      //   suggestionsBoxController: suggestionsBoxController,
-                      //   noItemsFoundBuilder: (context) {
-                      //     // show nothing
-                      //     return const SizedBox.shrink();
-                      //   },
-                      //   textFieldConfiguration: TextFieldConfiguration(
-                      //     controller: _textController,
-                      //     decoration: const InputDecoration(
-                      //       hintText: 'Type your message...',
-                      //       border: InputBorder.none,
-                      //     ),
-                      //     minLines: 1,
-                      //     maxLines: 6,
-                      //     textInputAction: Platform.isWindows
-                      //         ? TextInputAction.done
-                      //         : TextInputAction.newline,
-                      //     autofocus: true,
-                      //     focusNode: _focusNode,
-                      //   ),
-                      //   hideOnLoading: true,
-                      //   debounceDuration: const Duration(milliseconds: 1000),
-                      //   direction: AxisDirection.up,
-                      //   suggestionsCallback: (pattern) async {
-                      //     return await getSuggestions(pattern);
-                      //   },
-                      //   itemBuilder: (context, suggestion) {
-                      //     return ListTile(
-                      //       title: Text(suggestion),
-                      //     );
-                      //   },
-                      //   transitionBuilder:
-                      //       (context, suggestionsBox, controller) {
-                      //     return suggestionsBox;
-                      //   },
-                      //   onSuggestionSelected: (suggestion) {
-                      //     // remove starting "..." from suggestion
-                      //     suggestion = suggestion.substring(3);
-
-                      //     _textController.text =
-                      //         _textController.text + suggestion;
-                      //   },
-                      //   onSaved: (value) {
-                      //     // this._selectedCity = value
-                      //   },
-                      // ),
+            // a row of input box and attach button
+            Row(
+              children: [
+                // input box
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => _focusNode.requestFocus(),
+                            child: TextField(
+                              minLines: 1,
+                              maxLines: 6,
+                              scrollController: _textInputScrollController,
+                              autofocus: true,
+                              focusNode: _focusNode,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: Platform.isWindows
+                                  ? TextInputAction.done
+                                  : TextInputAction.newline,
+                              controller: _textController,
+                              decoration: const InputDecoration.collapsed(
+                                  hintText: 'Type your message...'),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.send),
+                          onPressed: _onSubmitMessage,
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _onSubmitMessage,
-                  ),
-                ],
-              ),
-            ),
+                ),
+                // // attach button
+                // Container(
+                //   margin: const EdgeInsets.only(right: 16.0),
+                //   child: IconButton(
+                //     icon: const Icon(Icons.attach_file),
+                //     onPressed: _onAttachButtonPressed,
+                //   ),
+                // ),
+              ],
+            )
           ],
         ),
       ),
@@ -597,12 +544,6 @@ class _ChatPageState extends State<ChatPage> {
               child: const Icon(Icons.arrow_downward),
             ),
     );
-
-    // GestureDetector(
-    //   onTap: () => FocusScope.of(context).unfocus(),
-    //   onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
-    //   child:
-    // );
   }
 
   void showContextMenuForConversation(
@@ -664,44 +605,27 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  // Future<Iterable<String>> getSuggestions(String input) async {
-  //   var currentMessages =
-  //       Provider.of<ConversationProvider>(context, listen: false)
-  //           .currentConversationMessages;
+  void _onAttachButtonPressed() {
+    // log entry
+    log.d('_onAttachButtonPressed');
 
-  //   // check if the input is empty with trim
-  //   if (input.trim().isEmpty) {
-  //     return const Iterable.empty();
-  //   }
+    // open image picker
+    ImagePicker()
+        .pickImage(
+      source: ImageSource.gallery,
+    )
+        .then((image) {
+      if (image != null) {
+        // log the image path
+        log.d('image.path: ${image.path}');
 
-  //   // add the input to the currentMessages
-  //   currentMessages.add(
-  //     {
-  //       'content': input,
-  //       'role': 'user',
-  //     },
-  //   );
+        // read the image into base64 string
+        final bytes = File(image.path).readAsBytesSync();
 
-  //   // log about to call autoCompleteMessage
-  //   log.d('about to call autoCompleteMessage');
+        String base64Image = base64Encode(bytes);
 
-  //   var autoCompleteResult = await autoCompleteMessage(
-  //     messages: currentMessages,
-  //     context: context,
-  //     client: _client,
-  //   );
-
-  //   // log autoCompleteResult
-  //   log.d('autoCompleteResult: $autoCompleteResult');
-
-  //   if (autoCompleteResult == null) {
-  //     return const Iterable.empty();
-  //   }
-
-  //   // return a list of suggestions based on the input
-  //   return Iterable.generate(
-  //     1,
-  //     (index) => "...$autoCompleteResult",
-  //   );
-  // }
+        _attachedImagesToSend.add(base64Image);
+      }
+    });
+  }
 }

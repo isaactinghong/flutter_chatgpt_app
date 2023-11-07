@@ -70,7 +70,7 @@ only give me at maximum 5 words.
       }
     }
   } catch (e) {
-    log.e('autoCompleteMessage error: $e', e);
+    log.e('autoCompleteMessage error: $e');
 
     // return the error message
     return 'Error: $e';

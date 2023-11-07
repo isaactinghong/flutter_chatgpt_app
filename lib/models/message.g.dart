@@ -13,6 +13,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           : DateTime.parse(json['timestamp'] as String),
       content: json['content'] as String? ?? '',
       isLoading: json['isLoading'] as bool? ?? false,
+      images:
+          (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -20,4 +22,5 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'timestamp': instance.timestamp.toIso8601String(),
       'senderId': instance.senderId,
       'isLoading': instance.isLoading,
+      'images': instance.images,
     };
